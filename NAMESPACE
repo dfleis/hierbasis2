@@ -1,0 +1,6 @@
+useDynLib(hierbasis2)
+
+importFrom(Rcpp, evalCpp)
+import(Matrix)
+
+export(hierbasis)
