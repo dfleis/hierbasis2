@@ -45,7 +45,7 @@ weights \eqn{w_{k, m}}. If left unspecified
 \eqn{w_{k, m} = k^m - (k - 1)^m}.}
 }
 \value{
-Returns an object of class \code{hierbasis} with elements
+Returns an object of class \code{hierbasis} with elements (to finish...)
 }
 \description{
 Univariate Nonparametric Regression Estimation

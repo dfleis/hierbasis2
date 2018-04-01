@@ -1,8 +1,3 @@
-sinc <- function(z) ifelse(z == 0, 1, sin(pi * z)/(pi * z))
-wavelet <- function(z, k) {
-  2^(k/2) * sinc(2^k * z)
-}
-
 #' Univariate Nonparametric Regression Estimation
 #' via a Hierarchical Penalty
 #'
@@ -105,7 +100,7 @@ hierbasis <- function(x, y,
     PSIbar <- attributes(PSI.c)[[2]]
 
   } else if (basis.type[1] == "trig") {
-    # TRIG basis expansion
+    # TRIGONOMETRIC basis expansion
 
     # generate and center basis exansion PSI (of order nbasis)
     PSI <- outer(x, 1:nbasis, FUN = function(z, nb) {
@@ -123,10 +118,10 @@ hierbasis <- function(x, y,
              is unfinished and experimental.")
 
   } else if (basis.type[1] == "wave") {
-    # WAVE basis expansion
+    # WAVELET basis expansion
 
     PSI <- outer(x, 0:(nbasis - 1), FUN = function(z, nb) {
-      wavelet(z, nb)
+      .wavelet(z, nb)
     })
     PSI.c <- scale(PSI, scale = F)
     PSIbar <- attributes(PSI.c)[[2]]
