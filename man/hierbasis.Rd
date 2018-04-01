@@ -44,6 +44,13 @@ assumed to be Gaussian.}
 weights \eqn{w_{k, m}}. If left unspecified
 (\code{weights = NULL}) then the default is set to
 \eqn{w_{k, m} = k^m - (k - 1)^m}.}
+
+\item{basis.type}{(New parameter for \code{hierbasis2}) Desired basis
+functions for the basis expansion of \code{x}. Specifies
+either a polynomial expansion \code{basis.type = "poly"},
+trigonometric expansion \code{basis.type = "trig"}, or
+wavelet expansion \code{basis.type = "wave"}. Default set
+to a polynomial expansion.}
 }
 \value{
 Returns an object of class \code{hierbasis} with elements:

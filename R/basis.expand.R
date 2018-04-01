@@ -1,31 +1,16 @@
 #
-#
+# Perform a basis expansion on a n-vector 'x' of size nbasis.
 #
 basis.expand <- function(x, nbasis,
                          basis.type = c("poly", "trig", "wave")) {
-  n <- nrow(x)
-  p <- ncol(x)
 
   if (basis.type[1] == "poly") {
     # POLYNOMIAL basis expansion
 
-    # check if the values of the polynomial basis expansion will
-    # exceed R's floating point abilities (i.e. max(x)^nbasis is too large)
-    nbasis.max <- floor(logb(.Machine$double.xmax, base = max(abs(x))))
-    if (nbasis > nbasis.max) {
-      warning(
-        paste0("Warning in hierbasis2::hierbasis(): ",
-               "Basis dimension implies expansion values too ",
-               "large for R's floating-point arithmetic. ",
-               "Setting nbasis = ", nbasis.max, ".")
-      )
-      nbasis <- nbasis.max
-    }
+    nbasis <- check.nbasis.poly(x, nbasis)
 
-    # generate and center basis exansion PSI (of order nbasis)
+    # generate basis exansion PSI of order nbasis
     PSI <- outer(x, 1:nbasis, "^")
-    PSI.c <- scale(PSI, scale = F)
-    PSIbar <- attributes(PSI.c)[[2]]
 
   } else if (basis.type[1] == "trig") {
     # TRIGONOMETRIC basis expansion
@@ -41,9 +26,6 @@ basis.expand <- function(x, nbasis,
              cos(nb * pi * z),
              sin((nb - 1) * pi * z))
     })
-    PSI.c <- scale(PSI, scale = F)
-    PSIbar <- attributes(PSI.c)[[2]]
-
     warning("Warning in hierbasis2::hierbasis(). Parameter 'basis.type = \"trig\"'
             is unfinished and experimental.")
 
@@ -53,9 +35,6 @@ basis.expand <- function(x, nbasis,
     PSI <- outer(x, 0:(nbasis - 1), FUN = function(z, nb) {
       wavelet(z, nb)
     })
-    PSI.c <- scale(PSI, scale = F)
-    PSIbar <- attributes(PSI.c)[[2]]
-
     warning("Warning in hierbasis2::hierbasis(). Parameter 'basis.type = \"wave\"'
             is unfinished and experimental.")
 
@@ -63,6 +42,9 @@ basis.expand <- function(x, nbasis,
     stop("Error in hierbasis2::hierbasis(). Parameter 'basis.type'
          only available for 'poly', 'trig', or 'wave' expansions.")
   }
+
+  PSI.c <- scale(PSI, scale = F)
+  PSIbar <- attributes(PSI.c)[[2]]
 
   out <- list()
   out$x           <- x

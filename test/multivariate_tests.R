@@ -10,7 +10,7 @@ source("R/wavelet.R")
 #===== generate data =====#
 #=========================#
 set.seed(124)
-n <- 1e3
+n <- 500
 p <- 5
 sigma <- 0.5
 
@@ -43,8 +43,13 @@ plot(y ~ X[,1], pch = 19, cex = 0.75,
 #===== fit models =====#
 #======================#
 pt <- proc.time()
-mod1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 20)
+mod1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 5)
 proc.time() - pt
+
+pt <- proc.time()
+mod2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 5)
+proc.time() - pt
+
 
 #==================#
 #==== figures =====#

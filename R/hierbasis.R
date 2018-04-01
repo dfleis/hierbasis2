@@ -42,6 +42,12 @@
 #'                weights \eqn{w_{k, m}}. If left unspecified
 #'                (\code{weights = NULL}) then the default is set to
 #'                \eqn{w_{k, m} = k^m - (k - 1)^m}.
+#' @param basis.type (New parameter for \code{hierbasis2}) Desired basis
+#'                   functions for the basis expansion of \code{x}. Specifies
+#'                   either a polynomial expansion \code{basis.type = "poly"},
+#'                   trigonometric expansion \code{basis.type = "trig"}, or
+#'                   wavelet expansion \code{basis.type = "wave"}. Default set
+#'                   to a polynomial expansion.
 #'
 #' @return Returns an object of class \code{hierbasis} with elements:
 #'
@@ -100,25 +106,18 @@ hierbasis <- function(x, y,
   # extract number of observations
   n <- length(y)
 
-  basis.out <- basis.expand(x, nbasis, basis.type)
-  PSI    <- basis.out$PSI
-  PSI.c  <- basis.out$PSI.c
-  PSIbar <- basis.out$PSIbar
+  basis.expand.out <- basis.expand(x, nbasis, basis.type)
+  nbasis <- basis.expand.out$nbasis
+  PSI    <- basis.expand.out$PSI
+  PSI.c  <- basis.expand.out$PSI.c
+  PSIbar <- basis.expand.out$PSIbar
 
   # center responses
   ybar <- mean(y)
   y.c <- y - ybar
 
   # compute penalty weights
-  if (is.null(weights)) {
-    w <- (1:nbasis)^m.const - (0:(nbasis - 1))^m.const
-  } else {
-    # confirm weights has the correct length of nbasis
-    if (length(weights) != nbasis) {
-      warning("Warning in hierbasis2::hierbasis(): 'weights' vector should be length 'nbasis'.")
-    }
-    w <- weights
-  }
+  w <- check.weights(weights, nbasis, m.const)
 
   # define weight matrix data structrue (which will include
   # the tuning parameter lambda)
@@ -126,9 +125,7 @@ hierbasis <- function(x, y,
   # columns corresponds to a single tuning parameter lambda
   w.mat <- matrix(rep(w, nlam), ncol = nlam)
 
-  if (is.null(max.lambda)) {
-    max.lambda <- NA
-  }
+  if (is.null(max.lambda)) max.lambda <- NA
 
   # create empty the hierbasis object to be returned
   out <- list(); class(out) <- "hierbasis"
@@ -185,205 +182,3 @@ print.hierbasis <- function(x, digits = 3, ...) {
   print(cbind(Lambda = signif(x$lambdas, digits),
               Deg.of.Poly = x$active))
 }
-
-#' Model Predictions for the Univariate hierbasis model
-#'
-#' The generic S3 method for predictions for objects of class \code{hierbasis}.
-#'
-#' @param object A fitted object of class '\code{hierbasis}'.
-#' @param new.x An optional vector of x values we wish to fit the fitted
-#'              functions at. This should be within the range of
-#'              the training data.
-#' @param interpolate A logical indicator of if we wish to use
-#'                    linear interpolation for estimation of fitted values.
-#'                    This becomes useful for high dof when the
-#'                    estimation of betas on the original scale becomes unstable.
-#' @param ... Not used. Other arguments for predict function.
-#'
-#' @details
-#' This function returns a matrix of  predicted values at the specified
-#' values of x given by \code{new.x}. Each column corresponds to a lambda value
-#' used for fitting the original model.
-#'
-#' If \code{new.x == NULL} then this function simply returns
-#' the fitted values of the estimated function at the original x values used for
-#' model fitting. The predicted values are presented for each lambda values.
-#'
-#' The function also has an option of making predictions
-#' via linear interpolation. If \code{TRUE}, a predicted value is equal to the
-#' fitted values if \code{new.x} is an x value used for model fitting. For a
-#' value between two x values used for model fitting, this simply returns the
-#' value of a linear interpolation of the two fitted values.
-#'
-#' @return
-#' \item{fitted.values}{A matrix with \code{length(new.x)} rows and
-#'                      \code{nlam} columns}
-#'
-#' @export
-#'
-#' @author Annik Gougeon,
-#' David Fleischer (\email{david.fleischer@@mail.mcgill.ca}).
-#' @references
-#' Haris, A., Shojaie, A. and Simon, N. (2016). Nonparametric Regression with
-#' Adaptive Smoothness via a Convex Hierarchical Penalty. Available on request
-#' by authors.
-#'
-#' @seealso The original \code{HierBasis} function, as implemented by
-#' Haris et al. (2016) can be found via
-#' \url{https://github.com/asadharis/HierBasis/}.
-#'
-predict.hierbasis <- function(object,
-                              new.x       = NULL,
-                              interpolate = FALSE, ...) {
-  nlam <- length(object$lambdas)  # Number of lambdas.
-
-  if (!interpolate) {
-    if (is.null(new.x)) {
-      # return the same fitted response if no new predictors
-      # are provided
-      object$fitted.values
-    } else {
-
-      basis.out <- basis.expand(new.x, nbasis, object$basis.type)
-      newx.mat <- basis.out$PSI
-
-      # X %*% beta without the intercept
-      fitted <- newx.mat %*% object$beta
-      # add the intercept
-      t(apply(fitted, 1, "+", object$intercept))
-    }
-  } else {
-    if (is.null(new.x)) {
-      return (object$fitted.values)
-    }
-
-    # return predicted values
-    sapply(1:nlam, FUN = function(i) {
-      # obtain curve for a particular value.
-      yhat.temp <- object$fitted.values[, i]
-      # Return predictions.
-      approx(x = object$x, y = yhat.temp, xout = new.x)$y
-    })
-
-  }
-}
-
-#' Cross-validation for Univariate hierbasis
-#'
-#' @details The function runs \code{nfolds} + 1 times. If \code{lambdas}
-#'          is not specified then it uses the first run to find the
-#'          sequence of \code{lambdas}. The remaining \code{nfolds}
-#'          runs are done using the fold subsets as usual.
-#'
-#' @param x A univariate vector representing the predictor.
-#' @param y A univariate vector respresenting the response.
-#' @param lambda (Optional) User-specified sequence of tuning parameters \eqn{lambda}.
-#' @param nfolds Number of cross-validation folds. Default: \code{nfolds = 10}.
-#' @param ... Other arguments that may be passed to \code{hierbasis}.
-#'
-#' @return Returns an object of class \code{hierbasis} with elements (to finish...)
-#'
-#' \item{to do...}{to do...}
-#'
-#' @export
-#'
-#' @author Annik Gougeon,
-#' David Fleischer (\email{david.fleischer@@mail.mcgill.ca}).
-#' @references
-#' Haris, A., Shojaie, A. and Simon, N. (2016). Nonparametric Regression with
-#' Adaptive Smoothness via a Convex Hierarchical Penalty. Available on request
-#' by authors.
-
-cv.hierbasis <- function(x, y, lambdas = NULL, nfolds = 10, ...) {
-  # TO DO: Allow for other loss functions than rmse.
-  # TO DO: Allow for parallel computing (foreach library?).
-  # TO DO: Split some overhead off in its own function.
-
-  n <- length(y)
-
-  if (!is.null(lambdas)) {
-    nlam <- length(lambdas)
-    max.lambda <- max(lambdas)
-    lam.min.ratio <- min(lambdas)/max.lambda
-    mod.init <- hierbasis(x, y,
-                          max.lambda    = max.lambda,
-                          lam.min.ratio = lam.min.ratio,
-                          nlam          = nlam, ...)
-  } else {
-    mod.init <- hierbasis(x, y, ...)
-    lambdas <- mod.init$lambdas
-    nlam <- length(lambdas)
-    max.lambda <- max(lambdas)
-    lam.min.ratio <- min(lambdas)/max.lambda
-  }
-
-  # assign observations to cross-validation
-  # fold 1, ..., nfolds
-  folds <- sample(cut(1:n, breaks = nfolds, labels = F))
-
-  # get training subset indices
-  train.idx <- lapply(1:nfolds, function(i) !(folds %in% i))
-
-  cv.err <- sapply(train.idx, function(trn) {
-    tst <- !trn # test subset indices
-
-    x.trn <- x[trn]; y.trn <- y[trn]
-    x.tst <- x[tst]; y.tst <- y[tst]
-
-    # compute training model and training error
-    mod.cv <- hierbasis(x = x.trn, y = y.trn,
-                        nlam          = nlam,
-                        max.lambda    = max.lambda,
-                        lam.min.ratio = lam.min.ratio, ...)
-
-    yhat.trn <- mod.cv$fitted.values # extract training fits
-    yhat.tst <- predict(mod.cv, new.x = x.tst) # compute test fits
-
-    # compute errors
-    if (mod.cv$type[1] == "binomial") {
-      warning("Warning: 'type' not yet defined for 'binomial' models.")
-    } else {
-      trn.err <- apply(yhat.trn, 2, function(yhat) rmse(y.trn, yhat))
-      tst.err <- apply(yhat.tst, 2, function(yhat) rmse(y.tst, yhat))
-    }
-
-    list("train" = trn.err, "test" = tst.err)
-  })
-
-  cv.train.err <- do.call("cbind", cv.err["train",])
-  cv.test.err  <- do.call("cbind", cv.err["test",])
-
-  # average over all folds
-  # each entry is an error corresponding to a unique lambda
-  train.err <- rowSums(cv.train.err)/nfolds
-  test.err  <- rowSums(cv.test.err)/nfolds
-  # compute standard errors
-  test.err.se <- apply(cv.test.err, 1, function(z) sd(z)/sqrt(length(z)))
-  test.err.hi <- test.err + test.err.se
-  test.err.lo <- test.err - test.err.se
-
-  best.lambdas <- getmin.lambda(lambdas, test.err, test.err.se)
-  best.lambdas
-
-
-  out <- list()
-  out$hierbasis.fit  <- mod.init
-  out$train.err      <- train.err
-  out$test.err       <- test.err
-  out$test.err.se    <- test.err.se
-  out$test.err.hi    <- test.err.hi
-  out$test.err.lo    <- test.err.lo
-  out$lambdas        <- lambdas
-  out$loss.func      <- "rmse" # to do... generalize...
-  out <- c(out, best.lambdas)
-
-  class(out) <- "cv.hierbasis"
-  out
-}
-
-
-
-
-
-
-

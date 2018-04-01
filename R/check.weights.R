@@ -9,6 +9,5 @@ check.weights <- function(weights, nbasis, m.const) {
     }
     w <- weights
   }
-
   w
 }

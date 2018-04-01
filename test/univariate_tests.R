@@ -17,13 +17,13 @@ f4 <- function(z) -2 * cos(1 * pi * z)
 #===== generate data =====#
 #=========================#
 set.seed(124)
-n <- 250
+n <- 1e3
 sigma <- 0.5
 
-x <- sort(runif(n, -2, 2)) # sort just to make plotting easier later
+x <- sort(runif(n, -3, 3)) # sort just to make plotting easier later
 eps <- rnorm(n, 0, sigma)
 
-ytrue <- f1(x) + f2(x) + f3(x) + f4(x) + f5(x)
+ytrue <- f1(x) + f2(x) + f3(x) + f4(x)
 y <- ytrue + eps
 
 plot(ytrue ~ x, ylim = range(y), pch = 19, cex = 0.25,
@@ -40,14 +40,23 @@ mod1 <- HierBasis::HierBasis(x = x, y = y, nbasis = 10)
 proc.time() - pt
 
 pt <- proc.time()
-mod2 <- hierbasis(x = x, y = y, nbasis = 10)
+mod2 <- hierbasis2::hierbasis(x = x, y = y, nbasis = 10)
 proc.time() - pt
+mod2$nbasis
+x.new <- rnorm(10)
+yhat1 <- predict(mod1, x.new)
+yhat2 <- predict(mod2, x.new)
+
+sum(abs(yhat1 - yhat2))
+
+
 
 pt <- proc.time()
 cv.mod2 <- cv.hierbasis(x, y, nbasis = 10, nfolds = 20)
 proc.time() - pt
 
 yhat1 <- predict(mod1)
+yhat2 <- predict(mod2)
 yhat2 <- predict(cv.mod2$hierbasis.fit)
 
 plot(cv.mod2)

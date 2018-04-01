@@ -4,4 +4,5 @@ importFrom(Rcpp, evalCpp)
 import(Matrix)
 
 export(hierbasis, print.hierbasis, predict.hierbasis,
-       cv.hierbasis, plot.cv.hierbasis, addhierbasis)
+       cv.hierbasis, plot.cv.hierbasis,
+       additivehierbasis, predict.additivehierbasis)
