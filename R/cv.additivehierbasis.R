@@ -47,7 +47,6 @@ cv.additivehierbasis <- function(X, y, lambdas = NULL, nfolds = 10, ...) {
 
     # compute training model and training error
     mod.cv <- additivehierbasis(X = X.trn, y = y.trn,
-                                nbasis        = mod.init$model.fit$nbasis,
                                 nlam          = mod.init$nlam,
                                 max.lambda    = mod.init$max.lambda,
                                 lam.min.ratio = mod.init$lam.min.ratio, ...)
