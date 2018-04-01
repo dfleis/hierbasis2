@@ -80,7 +80,7 @@ cv.additivehierbasis <- function(X, y, lambdas = NULL, nfolds = 10, ...) {
   best.lambdas <- getmin.lambda(mod.init$lambdas, test.err, test.err.se)
 
   out <- list()
-  out$model.fit   <- mod.init$model.fit$mod.init
+  out$model.fit   <- mod.init$model.fit
   out$train.err   <- train.err
   out$test.err    <- test.err
   out$test.err.se <- test.err.se
