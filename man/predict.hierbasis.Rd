@@ -4,7 +4,8 @@
 \alias{predict.hierbasis}
 \title{Model Predictions for the Univariate hierbasis model}
 \usage{
-\method{predict}{hierbasis}(object, new.x = NULL, interpolate = FALSE, ...)
+\method{predict}{hierbasis}(object, new.x = NULL, lam.idx = NULL,
+  interpolate = FALSE, ...)
 }
 \arguments{
 \item{object}{A fitted object of class '\code{hierbasis}'.}

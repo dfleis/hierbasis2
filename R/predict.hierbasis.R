@@ -46,26 +46,27 @@
 #'
 predict.hierbasis <- function(object,
                               new.x       = NULL,
+                              lam.idx     = NULL,
                               interpolate = FALSE, ...) {
-  nlam <- length(object$lambdas)
+  if (is.null(lam.idx)) {
+    lam.idx <- 1:length(object$lambdas)
+  }
 
   if (is.null(new.x)) {
     # return fitted.response if no new predictors are supplied
-    object$fitted.values
+    object$fitted.values[,lam.idx]
 
   } else {
     if (!interpolate) {
       basis.expand.out <- basis.expand(new.x, object$nbasis, object$basis.type)
       new.x.expand     <- basis.expand.out$PSI
 
-      # X %*% beta without the intercept
-      fitted <- new.x.expand %*% object$beta
-      # add the intercept
-      t(apply(fitted, 1, "+", object$intercept))
+      # X %*% beta with the intercept
+      fitted <- cbind(1, new.x.expand) %*% coef(object, lam.idx = lam.idx)
 
     } else {
       # return predicted values
-      sapply(1:nlam, FUN = function(i) {
+      sapply(lam.idx, FUN = function(i) {
         # obtain curve for a particular value
         yhat.temp <- object$fitted.values[, i]
         # return predictions

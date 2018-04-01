@@ -43,7 +43,12 @@ pt <- proc.time()
 mod2 <- hierbasis2::hierbasis(x = x, y = y, nbasis = 10)
 proc.time() - pt
 
-beta.mod2 <-  coef(mod2)
+new.x <- rnorm(10)
+yhat1 <- predict(mod1, new.x = new.x)
+yhat2 <- predict(mod2, new.x = new.x, lam.idx = 10)
+
+
+beta.mod2 <- coef(mod2)
 plot(NA, log = 'x',
      xlim = range(mod2$lambdas),
      ylim = range(beta.mod2),
@@ -68,9 +73,15 @@ pt <- proc.time()
 cv.mod2 <- cv.hierbasis(x, y, nbasis = 10, nfolds = 10)
 proc.time() - pt
 
-yhat1 <- predict(mod1)
-yhat2 <- predict(mod2)
-yhat2 <- predict(cv.mod2$model.fit)
+new.x <- rnorm(10)
+yhat1 <- predict(mod1, new.x = new.x)
+yhat2 <- predict(mod2, new.x = new.x, lam.idx = cv.mod2$lambda.1se.idx)
+yhat3 <- predict(cv.mod2, new.x = new.x)
+
+yhat1[,cv.mod2$lambda.1se.idx] - yhat2
+yhat2 - yhat3
+
+cv.mod2
 
 plot(cv.mod2)
 #===================#
