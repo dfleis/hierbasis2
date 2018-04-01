@@ -46,7 +46,7 @@ weights \eqn{w_{k, m}}. If left unspecified
 \eqn{w_{k, m} = k^m - (k - 1)^m}.}
 }
 \value{
-Returns an object of class \code{hierbasis} with elements (to finish...):
+Returns an object of class \code{hierbasis} with elements:
 
 \item{x, y}{The original \code{x} and \code{y} used as inputs.}
 \item{m.const}{The parameter \code{m.const} used for smoothing.}

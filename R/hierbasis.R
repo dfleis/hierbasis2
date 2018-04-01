@@ -43,7 +43,7 @@
 #'                (\code{weights = NULL}) then the default is set to
 #'                \eqn{w_{k, m} = k^m - (k - 1)^m}.
 #'
-#' @return Returns an object of class \code{hierbasis} with elements (to finish...):
+#' @return Returns an object of class \code{hierbasis} with elements:
 #'
 #' \item{x, y}{The original \code{x} and \code{y} used as inputs.}
 #' \item{m.const}{The parameter \code{m.const} used for smoothing.}
@@ -100,63 +100,10 @@ hierbasis <- function(x, y,
   # extract number of observations
   n <- length(y)
 
-  if (basis.type[1] == "poly") {
-    # POLYNOMIAL basis expansion
-
-    # check if the values of the polynomial basis expansion will
-    # exceed R's floating point abilities (i.e. max(x)^nbasis is too large)
-    nbasis.max <- floor(logb(.Machine$double.xmax, base = max(abs(x))))
-    if (nbasis > nbasis.max) {
-      warning(
-        paste0("Warning in hierbasis2::hierbasis(): ",
-                "Basis dimension implies expansion values too ",
-                "large for R's floating-point arithmetic. ",
-                "Setting nbasis = ", nbasis.max, ".")
-      )
-      nbasis <- nbasis.max
-    }
-
-    # generate and center basis exansion PSI (of order nbasis)
-    PSI <- outer(x, 1:nbasis, "^")
-    PSI.c <- scale(PSI, scale = F)
-    PSIbar <- attributes(PSI.c)[[2]]
-
-  } else if (basis.type[1] == "trig") {
-    # TRIGONOMETRIC basis expansion
-
-    # generate and center basis exansion PSI (of order nbasis)
-    # Note: The format of the trig basis expansion is changed from
-    # the examples used in the original HierBasis paper.
-    # 1 - Remove intercept term since we center the data.
-    # 2 - Add odd degree trig functions in addition to the even
-    #     degree functions.
-    PSI <- outer(x, 1:nbasis, FUN = function(z, nb) {
-      ifelse(nb %% 2 == 1,
-             cos(nb * pi * z),
-             sin((nb - 1) * pi * z))
-    })
-    PSI.c <- scale(PSI, scale = F)
-    PSIbar <- attributes(PSI.c)[[2]]
-
-    warning("Warning in hierbasis2::hierbasis(). Parameter 'basis.type = \"trig\"'
-             is unfinished and experimental.")
-
-  } else if (basis.type[1] == "wave") {
-    # WAVELET basis expansion
-
-    PSI <- outer(x, 0:(nbasis - 1), FUN = function(z, nb) {
-      wavelet(z, nb)
-    })
-    PSI.c <- scale(PSI, scale = F)
-    PSIbar <- attributes(PSI.c)[[2]]
-
-    warning("Warning in hierbasis2::hierbasis(). Parameter 'basis.type = \"wave\"'
-             is unfinished and experimental.")
-
-  } else {
-    stop("Error in hierbasis2::hierbasis(). Parameter 'basis.type'
-          only available for 'poly', 'trig', or 'wave' expansions.")
-  }
+  basis.out <- basis.expand(x, nbasis, basis.type)
+  PSI    <- basis.out$PSI
+  PSI.c  <- basis.out$PSI.c
+  PSIbar <- basis.out$PSIbar
 
   # center responses
   ybar <- mean(y)
@@ -296,27 +243,9 @@ predict.hierbasis <- function(object,
       # are provided
       object$fitted.values
     } else {
-      if (object$basis.type[1] == "poly") {
-        # POLY: basis-expanded design matrix
-        newx.mat <- sapply(1:object$nbasis, function(i) {
-          new.x^i
-        })
 
-      } else if (object$basis.type[1] == "trig") {
-        # TRIG: basis-expanded design matrix
-        newx.mat <- outer(new.x, 1:object$nbasis, FUN = function(z, nb) {
-          ifelse(nb %% 2 == 1,
-                 cos(nb * pi * z),
-                 sin((nb - 1) * pi * z))
-        })
-
-      } else if (object$basis.type[1] == "wave") {
-        # WAVE: basis-expanded design matrix
-        newx.mat <- outer(new.x, 0:(object$nbasis - 1), FUN = function(z, nb) {
-          wavelet(z, nb)
-        })
-
-      }
+      basis.out <- basis.expand(new.x, nbasis, object$basis.type)
+      newx.mat <- basis.out$PSI
 
       # X %*% beta without the intercept
       fitted <- newx.mat %*% object$beta
@@ -328,11 +257,10 @@ predict.hierbasis <- function(object,
       return (object$fitted.values)
     }
 
-    # Return predicted values.
+    # return predicted values
     sapply(1:nlam, FUN = function(i) {
-      # Obtain curve for a particular value.
+      # obtain curve for a particular value.
       yhat.temp <- object$fitted.values[, i]
-
       # Return predictions.
       approx(x = object$x, y = yhat.temp, xout = new.x)$y
     })
