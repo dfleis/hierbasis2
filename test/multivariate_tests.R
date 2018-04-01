@@ -55,7 +55,7 @@ yhat2 <- predict(mod2)
 sum(abs(yhat1 - yhat2))
 
 pt <- proc.time()
-cv.mod2 <- cv.additivehierbasis(X = X, y = y, nbasis = 10, nfolds = 10)
+cv.mod2 <- hierbasis2::cv.additivehierbasis(X = X, y = y, nbasis = 10, nfolds = 10)
 proc.time() - pt
 
 m <- cv.init()

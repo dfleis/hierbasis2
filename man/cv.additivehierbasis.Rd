@@ -4,16 +4,16 @@
 \alias{cv.additivehierbasis}
 \title{Cross-validation for Multivariate additivehierbasis Models}
 \usage{
-cv.additivehierbasis(x, y, lambdas = NULL, nfolds = 10, ...)
+cv.additivehierbasis(X, y, lambdas = NULL, nfolds = 10, ...)
 }
 \arguments{
+\item{X}{An \eqn{n \times p}{n x p} matrix of covariates.}
+
 \item{y}{A univariate vector respresenting the response.}
 
 \item{nfolds}{Number of cross-validation folds. Default: \code{nfolds = 10}.}
 
 \item{...}{Other arguments that may be passed to \code{hierbasis}.}
-
-\item{X}{An \eqn{n \times p}{n x p} matrix of covariates.}
 
 \item{lambda}{(Optional) User-specified sequence of tuning parameters \eqn{lambda}.}
 }

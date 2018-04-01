@@ -24,7 +24,7 @@
 #' Adaptive Smoothness via a Convex Hierarchical Penalty. Available on request
 #' by authors.
 #'
-cv.additivehierbasis <- function(x, y, lambdas = NULL, nfolds = 10, ...) {
+cv.additivehierbasis <- function(X, y, lambdas = NULL, nfolds = 10, ...) {
   # TO DO: Allow for other loss functions than rmse.
   # TO DO: Allow for parallel computing (foreach library?).
   # TO DO: Split some overhead off in its own function.
