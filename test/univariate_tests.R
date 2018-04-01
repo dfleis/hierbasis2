@@ -59,7 +59,7 @@ proc.time() - pt
 
 yhat1 <- predict(mod1)
 yhat2 <- predict(mod2)
-yhat2 <- predict(cv.mod2$hierbasis.fit)
+yhat2 <- predict(cv.mod2$model.fit)
 
 plot(cv.mod2)
 #===================#
