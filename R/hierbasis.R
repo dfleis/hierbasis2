@@ -19,22 +19,28 @@
 #' @param x A univariate vector representing the predictor.
 #' @param y A univariate vector respresenting the response.
 #' @param nbasis The number of basis functions to be used in the
-#' basis expansion of \code{x}. Default: \code{nbasis = length(y)}.
+#'               basis expansion of \code{x}. Default:
+#'               \code{nbasis = length(y)}.
 #' @param max.lambda The largest value of \eqn{\lambda} penalizing
-#' the hierarchical penalty. Default: \code{max.lambda = NULL}
-#' (computed data-adaptively).
+#'                   the hierarchical penalty. Default:
+#'                   \code{max.lambda = NULL} (computed data-adaptively).
 #' @param lam.min.ratio The ratio of the smallest value of \eqn{\lambda}
-#' to the largest \eqn{\lambda}. Default: \code{lam.min.ratio = 1e-04}.
+#'                      to the largest \eqn{\lambda}.
+#'                      Default: \code{lam.min.ratio = 1e-04}.
 #' @param nlam The number \eqn{\lambda}'s to compute the \code{hierbasis}
-#' estimators (computed on a base-10 \eqn{log} scale). Default:
-#' \code{nlam = 50}.
-#' @param m Smoothing parameter controlling the degree of polynomial
-#' smoothing/decay performed by the weights in the penalty \eqn{\Omega}.
-#' Default: \code{m = 3}.
+#'             estimators (computed on a base-10 \eqn{log} scale). Default:
+#'             \code{nlam = 50}.
+#' @param m.const Smoothing parameter controlling the degree of polynomial
+#'                smoothing/decay performed by the weights in the penalty
+#'                \eqn{\Omega}.Default: \code{m.const = 3}.
 #' @param type Specifies either Gaussian regression (\code{"gaussian"})
-#' with a continuous response vector or binomial regression
-#' (\code{"binomial"}) with binary response. Default type is assumed to be
-#' Gaussian.
+#'             with a continuous response vector or binomial regression
+#'             (\code{"binomial"}) with binary response. Default type is
+#'             assumed to be Gaussian.
+#' @param weights (New parameter for \code{hierbasis2}) Permits user-specified
+#'                weights \eqn{w_{k, m}}. If left unspecified
+#'                (\code{weights = NULL}) then the default is set to
+#'                \eqn{w_{k, m} = k^m - (k - 1)^m}.
 #'
 #' @return Returns an object of class \code{hierbasis} with elements
 #'
@@ -56,37 +62,34 @@ hierbasis <- function(x, y,
                       max.lambda    = NULL,
                       lam.min.ratio = 1e-04,
                       nlam          = 50,
-                      m             = 3,
-                      type          = c("gaussian", "binomial"))
+                      m.const       = 3,
+                      type          = c("gaussian", "binomial"),
+                      weights       = NULL)
 {
   # To do:
   #   * Implement binomial hierbasis estimator.
   #   * Consider multicategory responses (not in HierBasis).
-  #   * Consider renaming 'type' to 'family' in order to be consistent.
-  #     with other regression functions implemented in R.
-  #   * Add max.iter, tol, max.iter.inner, tol.inner parameters.
+  #   * Add max.iter, tol, max.iter.inner, tol.inner parameters (only
+  #     used in the 'binomial' case).
   #   * Implementing nonpolynomial basis expansion (wavelet, trig, etc).
   #   * Implementing other weight structures.
 
   # extract number of observations
   n <- length(y)
 
-  # nbasis.max <- floor(logb(.Machine$double.xmax, base = max(abs(x))))
-  # if (nbasis > nbasis.max) {
-  #   warning(
-  #     paste0("Warning in hierbasis2::hierbasis(): ",
-  #             "Basis dimension leads to values too ",
-  #             "large for R's floating-point arithmetic. ",
-  #             "Setting nbasis = ", nbasis.max, ".")
-  #   )
-  #   nbasis <- nbasis.max
-  # }
-
+  nbasis.max <- floor(logb(.Machine$double.xmax, base = max(abs(x))))
+  if (nbasis > nbasis.max) {
+    warning(
+      paste0("Warning in hierbasis2::hierbasis(): ",
+              "Basis dimension implies expansion values too ",
+              "large for R's floating-point arithmetic. ",
+              "Setting nbasis = ", nbasis.max, ".")
+    )
+    nbasis <- nbasis.max
+  }
 
   # generate and center basis exansion PSI (of order nbasis)
   PSI <- outer(x, 1:nbasis, "^")
-  #PSI.c <- center.fast(PSI)
-  #PSIbar <- attr(PSI.c, "scaled:center")
   PSI.c <- scale(PSI, scale = F)
   PSIbar <- attributes(PSI.c)[[2]]
 
@@ -95,12 +98,20 @@ hierbasis <- function(x, y,
   y.c <- y - ybar
 
   # compute penalty weights
-  w <- (1:nbasis)^m - (0:(nbasis - 1))^m
+  if (is.null(weights)) {
+    w <- (1:nbasis)^m.const - (0:(nbasis - 1))^m.const
+  } else {
+    # confirm weights has the correct length of nbasis
+    if (length(weights) != nbasis) {
+      warning("Warning in hierbasis2::hierbasis(): 'weights' vector should be length 'nbasis'.")
+    }
+    w <- weights
+  }
 
-  # weight matrix (includes tuning parameter lambda)
-  # organized columnwise (i.e., rows correspond to a single
-  # weight w_k, columns corresponds to a single tuning
-  # parameter lambda)
+  # define weight matrix data structrue (which will include
+  # the tuning parameter lambda)
+  # rows correspond to a single weight w_k value
+  # columns corresponds to a single tuning parameter lambda
   w.mat <- matrix(rep(w, nlam), ncol = nlam)
 
   if (is.null(max.lambda)) {
@@ -129,13 +140,13 @@ hierbasis <- function(x, y,
 
     out$x                     <- x
     out$y                     <- y
-    out$m                     <- m
+    out$m.const              <- m.const
     out$nbasis                <- nbasis
     out$basis.expansion       <- PSI
     out$basis.expansion.means <- PSIbar
     out$ybar                  <- ybar
 
-    out$lambda        <- as.vector(hierbasis.fit$lambda)
+    out$lambdas       <- as.vector(hierbasis.fit$lambda)
     out$intercept     <- intercept
     out$beta          <- betahat
     out$fitted.values <- t(yhat)
@@ -155,6 +166,94 @@ hierbasis <- function(x, y,
   return (out)
 }
 
+print.hierbasis <- function(x, digits = 3, ...) {
+  cat("\nCall: ", deparse(x$call), "\n\n")
+  print(cbind(Lambda = signif(x$lambdas, digits),
+              Deg.of.Poly = x$n.active))
+}
+
+#' Model Predictions for the Univariate hierbasis model
+#'
+#' The generic S3 method for predictions for objects of class \code{hierbasis}.
+#'
+#' @param object A fitted object of class '\code{hierbasis}'.
+#' @param new.x An optional vector of x values we wish to fit the fitted
+#'              functions at. This should be within the range of
+#'              the training data.
+#' @param interpolate A logical indicator of if we wish to use
+#'                    linear interpolation for estimation of fitted values.
+#'                    This becomes useful for high dof when the
+#'                    estimation of betas on the original scale becomes unstable.
+#' @param ... Not used. Other arguments for predict function.
+#'
+#' @details
+#' This function returns a matrix of  predicted values at the specified
+#' values of x given by \code{new.x}. Each column corresponds to a lambda value
+#' used for fitting the original model.
+#'
+#' If \code{new.x == NULL} then this function simply returns
+#' the fitted values of the estimated function at the original x values used for
+#' model fitting. The predicted values are presented for each lambda values.
+#'
+#' The function also has an option of making predictions
+#' via linear interpolation. If \code{TRUE}, a predicted value is equal to the
+#' fitted values if \code{new.x} is an x value used for model fitting. For a
+#' value between two x values used for model fitting, this simply returns the
+#' value of a linear interpolation of the two fitted values.
+#'
+#' @return
+#' \item{fitted.values}{A matrix with \code{length(new.x)} rows and
+#'                      \code{nlam} columns}
+#'
+#' @export
+#'
+#' @author Asad Haris (\email{aharis@@uw.edu}),
+#' Ali Shojaie and Noah Simon
+#' @references
+#' Haris, A., Shojaie, A. and Simon, N. (2016). Nonparametric Regression with
+#' Adaptive Smoothness via a Convex Hierarchical Penalty. Available on request
+#' by authors.
+#'
+#' @seealso The original \code{HierBasis} function, as implemented by
+#' Haris et al. (2016) can be found via
+#' \url{https://github.com/asadharis/HierBasis/}.
+#'
+predict.hierbasis <- function(object,
+                              new.x       = NULL,
+                              interpolate = FALSE, ...) {
+  nlam <- length(object$lambdas)  # Number of lambdas.
+
+  if(!interpolate) {
+    if(is.null(new.x)) {
+      object$fitted.values
+    } else {
+      # Obtain the basis-expanded design matrix.
+      newx.mat <- sapply(1:object$nbasis, function(i) {
+        new.x^i
+      })
+
+      # X %*% beta without the intercept part.
+      fitted <- newx.mat %*% object$beta
+      # add the intercept
+      t(apply(fitted, 1, "+", object$intercept))
+    }
+  } else {
+
+    if(is.null(new.x)) {
+      return(object$fitted.values)
+    }
+
+    # Return predicted values.
+    sapply(1:nlam, FUN = function(i) {
+      # Obtain curve for a particular value.
+      yhat.temp <- object$fitted.values[, i]
+
+      # Return predictions.
+      approx(x = object$x, y = yhat.temp, xout = new.x)$y
+    })
+
+  }
+}
 
 
 

@@ -6,8 +6,8 @@
 via a Hierarchical Penalty}
 \usage{
 hierbasis(x, y, nbasis = length(y), max.lambda = NULL,
-  lam.min.ratio = 1e-04, nlam = 50, m = 3, type = c("gaussian",
-  "binomial"))
+  lam.min.ratio = 1e-04, nlam = 50, m.const = 3, type = c("gaussian",
+  "binomial"), weights = NULL)
 }
 \arguments{
 \item{x}{A univariate vector representing the predictor.}
@@ -15,27 +15,34 @@ hierbasis(x, y, nbasis = length(y), max.lambda = NULL,
 \item{y}{A univariate vector respresenting the response.}
 
 \item{nbasis}{The number of basis functions to be used in the
-basis expansion of \code{x}. Default: \code{nbasis = length(y)}.}
+basis expansion of \code{x}. Default:
+\code{nbasis = length(y)}.}
 
 \item{max.lambda}{The largest value of \eqn{\lambda} penalizing
-the hierarchical penalty. Default: \code{max.lambda = NULL}
-(computed data-adaptively).}
+the hierarchical penalty. Default:
+\code{max.lambda = NULL} (computed data-adaptively).}
 
 \item{lam.min.ratio}{The ratio of the smallest value of \eqn{\lambda}
-to the largest \eqn{\lambda}. Default: \code{lam.min.ratio = 1e-04}.}
+to the largest \eqn{\lambda}.
+Default: \code{lam.min.ratio = 1e-04}.}
 
 \item{nlam}{The number \eqn{\lambda}'s to compute the \code{hierbasis}
 estimators (computed on a base-10 \eqn{log} scale). Default:
 \code{nlam = 50}.}
 
-\item{m}{Smoothing parameter controlling the degree of polynomial
-smoothing/decay performed by the weights in the penalty \eqn{\Omega}.
-Default: \code{m = 3}.}
+\item{m.const}{Smoothing parameter controlling the degree of polynomial
+smoothing/decay performed by the weights in the penalty
+\eqn{\Omega}.Default: \code{m.const = 3}.}
 
 \item{type}{Specifies either Gaussian regression (\code{"gaussian"})
 with a continuous response vector or binomial regression
-(\code{"binomial"}) with binary response. Default type is assumed to be
-Gaussian.}
+(\code{"binomial"}) with binary response. Default type is
+assumed to be Gaussian.}
+
+\item{weights}{(New parameter for \code{hierbasis2}) Permits user-specified
+weights \eqn{w_{k, m}}. If left unspecified
+(\code{weights = NULL}) then the default is set to
+\eqn{w_{k, m} = k^m - (k - 1)^m}.}
 }
 \value{
 Returns an object of class \code{hierbasis} with elements
