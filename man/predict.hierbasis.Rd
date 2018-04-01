@@ -53,6 +53,6 @@ Haris et al. (2016) can be found via
 \url{https://github.com/asadharis/HierBasis/}.
 }
 \author{
-Asad Haris (\email{aharis@uw.edu}),
-Ali Shojaie and Noah Simon
+Annik Gougeon,
+David Fleischer (\email{david.fleischer@mail.mcgill.ca}).
 }

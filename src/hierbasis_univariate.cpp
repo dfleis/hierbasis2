@@ -74,8 +74,8 @@ List solvehierbasis(arma::mat design_mat,
   //    design_mat: A design matrix of size n * J_n, where J_n is number of
   //                basis functions. This matrix should be centered.
   //    y: The centered response vector.
-  //    ak: A J_n-vector of weights where ak[j] = j^m - (j-1)^m for a smoothness
-  //        level m.
+  //    ak: A J_n-vector of weights where (by default) ak[j] = j^m - (j-1)^m for 
+  //        a smoothness level m.
   //    weights: A J_n * nlam matrix which is simply the concatenation [ak,ak,...,ak].
   //    n: The number of observations, equal to length(y).
   //    lam_min_ratio: Ratio of min_lambda to max_lambda.
@@ -91,7 +91,7 @@ List solvehierbasis(arma::mat design_mat,
   arma::qr_econ(x_mat, R_mat, design_mat);
 
   x_mat = x_mat * sqrt(n);
-  R_mat  = R_mat / sqrt(n);
+  R_mat = R_mat / sqrt(n);
   // arma::sp_mat R_mat2 = sp_mat(R_mat / sqrt(n));
 
 
@@ -121,7 +121,7 @@ List solvehierbasis(arma::mat design_mat,
   weights.each_row() %= lambdas.t();
 
   // Obtain beta.hat, solve prox problem.
-  arma::sp_mat beta_hat =  prox(v_temp, weights);
+  arma::sp_mat beta_hat = prox(v_temp, weights);
 
   // Take the inverse of the R_mat to obtain solution on the original scale
   arma::mat beta_hat2 = solve(trimatu(R_mat), mat(beta_hat));

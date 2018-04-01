@@ -1,3 +1,8 @@
+sinc <- function(z) ifelse(z == 0, 1, sin(pi * z)/(pi * z))
+wavelet <- function(z, k) {
+  2^(k/2) * sinc(2^k * z)
+}
+
 #' Univariate Nonparametric Regression Estimation
 #' via a Hierarchical Penalty
 #'
@@ -42,7 +47,7 @@
 #'                (\code{weights = NULL}) then the default is set to
 #'                \eqn{w_{k, m} = k^m - (k - 1)^m}.
 #'
-#' @return Returns an object of class \code{hierbasis} with elements
+#' @return Returns an object of class \code{hierbasis} with elements (to finish...)
 #'
 #' @export
 #'
@@ -64,7 +69,8 @@ hierbasis <- function(x, y,
                       nlam          = 50,
                       m.const       = 3,
                       type          = c("gaussian", "binomial"),
-                      weights       = NULL)
+                      weights       = NULL,
+                      basis.type    = c("poly", "trig", "wave"))
 {
   # To do:
   #   * Implement binomial hierbasis estimator.
@@ -77,21 +83,61 @@ hierbasis <- function(x, y,
   # extract number of observations
   n <- length(y)
 
-  nbasis.max <- floor(logb(.Machine$double.xmax, base = max(abs(x))))
-  if (nbasis > nbasis.max) {
-    warning(
-      paste0("Warning in hierbasis2::hierbasis(): ",
-              "Basis dimension implies expansion values too ",
-              "large for R's floating-point arithmetic. ",
-              "Setting nbasis = ", nbasis.max, ".")
-    )
-    nbasis <- nbasis.max
-  }
+  if (basis.type[1] == "poly") {
+    # POLY basis expansion
 
-  # generate and center basis exansion PSI (of order nbasis)
-  PSI <- outer(x, 1:nbasis, "^")
-  PSI.c <- scale(PSI, scale = F)
-  PSIbar <- attributes(PSI.c)[[2]]
+    # check if the values of the polynomial basis expansion will
+    # exceed R's floating point abilities (i.e. max(x)^nbasis is too large)
+    nbasis.max <- floor(logb(.Machine$double.xmax, base = max(abs(x))))
+    if (nbasis > nbasis.max) {
+      warning(
+        paste0("Warning in hierbasis2::hierbasis(): ",
+                "Basis dimension implies expansion values too ",
+                "large for R's floating-point arithmetic. ",
+                "Setting nbasis = ", nbasis.max, ".")
+      )
+      nbasis <- nbasis.max
+    }
+
+    # generate and center basis exansion PSI (of order nbasis)
+    PSI <- outer(x, 1:nbasis, "^")
+    PSI.c <- scale(PSI, scale = F)
+    PSIbar <- attributes(PSI.c)[[2]]
+
+  } else if (basis.type[1] == "trig") {
+    # TRIG basis expansion
+
+    # generate and center basis exansion PSI (of order nbasis)
+    PSI <- outer(x, 1:nbasis, FUN = function(z, nb) {
+      ifelse(nb == 1, rep(1, length(z)), {
+        kb <- floor(nb/2) * 2
+        ifelse(nb %% 2 == 0,
+               cos(kb * pi * z),
+               sin(kb * pi * z))
+      })
+    })
+    PSI.c <- scale(PSI, scale = F)
+    PSIbar <- attributes(PSI.c)[[2]]
+
+    warning("Warning in hierbasis2::hierbasis(). Parameter 'basis.type = \"trig\"'
+             is unfinished and experimental.")
+
+  } else if (basis.type[1] == "wave") {
+    # WAVE basis expansion
+
+    PSI <- outer(x, 0:(nbasis - 1), FUN = function(z, nb) {
+      wavelet(z, nb)
+    })
+    PSI.c <- scale(PSI, scale = F)
+    PSIbar <- attributes(PSI.c)[[2]]
+
+    warning("Warning in hierbasis2::hierbasis(). Parameter 'basis.type = \"wave\"'
+             is unfinished and experimental.")
+
+  } else {
+    stop("Error in hierbasis2::hierbasis(). Parameter 'basis.type'
+          only available for 'poly', 'trig', or 'wave' expansions.")
+  }
 
   # center responses
   ybar <- mean(y)
@@ -119,7 +165,7 @@ hierbasis <- function(x, y,
   }
 
   # create empty the hierbasis object to be returned
-  out <- list(); class(out) <- "HierBasis"
+  out <- list(); class(out) <- "hierbasis"
 
   if (type[1] == "gaussian") {
     # linear regression analogue
@@ -140,7 +186,7 @@ hierbasis <- function(x, y,
 
     out$x                     <- x
     out$y                     <- y
-    out$m.const              <- m.const
+    out$m.const               <- m.const
     out$nbasis                <- nbasis
     out$basis.expansion       <- PSI
     out$basis.expansion.means <- PSIbar
@@ -151,11 +197,11 @@ hierbasis <- function(x, y,
     out$beta          <- betahat
     out$fitted.values <- t(yhat)
     out$active        <- active.set
+    out$basis.type    <- basis.type
     out$call          <- match.call()
 
   } else if (type[1] == "binomial") {
     # logistic regression analogue
-
     stop("Error in hierbasis2::hierbasis(). Parameter 'type = \"binomial\"'
          not yet implemented.")
   } else {
@@ -207,8 +253,8 @@ print.hierbasis <- function(x, digits = 3, ...) {
 #'
 #' @export
 #'
-#' @author Asad Haris (\email{aharis@@uw.edu}),
-#' Ali Shojaie and Noah Simon
+#' @author Annik Gougeon,
+#' David Fleischer (\email{david.fleischer@@mail.mcgill.ca}).
 #' @references
 #' Haris, A., Shojaie, A. and Simon, N. (2016). Nonparametric Regression with
 #' Adaptive Smoothness via a Convex Hierarchical Penalty. Available on request
@@ -223,24 +269,47 @@ predict.hierbasis <- function(object,
                               interpolate = FALSE, ...) {
   nlam <- length(object$lambdas)  # Number of lambdas.
 
-  if(!interpolate) {
-    if(is.null(new.x)) {
+  if (!interpolate) {
+    if (is.null(new.x)) {
+      # return the same fitted response if no new predictors
+      # are provided
       object$fitted.values
     } else {
-      # Obtain the basis-expanded design matrix.
-      newx.mat <- sapply(1:object$nbasis, function(i) {
-        new.x^i
-      })
+      if (object$basis.type == "poly") {
+        # POLY: basis-expanded design matrix
 
-      # X %*% beta without the intercept part.
+        newx.mat <- sapply(1:object$nbasis, function(i) {
+          new.x^i
+        })
+      } else if (object$basis.type == "trig") {
+        # TRIG: basis-expanded design matrix
+
+        newx.mat <- outer(x, 1:object$nbasis, FUN = function(z, nb) {
+          ifelse(nb == 1, rep(1, length(z)), {
+            kb <- floor(nb/2) * 2
+            ifelse(nb %% 2 == 0,
+                   cos(kb * pi * z),
+                   sin(kb * pi * z))
+          })
+        })
+
+      } else if (object$basis.type == "wave") {
+        # WAVE: basis-expanded design matrix
+
+        newx.mat <- outer(x, 0:(object$nbasis - 1), FUN = function(z, nb) {
+          wavelet(z, nb)
+        })
+
+      }
+
+      # X %*% beta without the intercept
       fitted <- newx.mat %*% object$beta
       # add the intercept
       t(apply(fitted, 1, "+", object$intercept))
     }
   } else {
-
-    if(is.null(new.x)) {
-      return(object$fitted.values)
+    if (is.null(new.x)) {
+      return (object$fitted.values)
     }
 
     # Return predicted values.

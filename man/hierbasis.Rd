@@ -7,7 +7,7 @@ via a Hierarchical Penalty}
 \usage{
 hierbasis(x, y, nbasis = length(y), max.lambda = NULL,
   lam.min.ratio = 1e-04, nlam = 50, m.const = 3, type = c("gaussian",
-  "binomial"), weights = NULL)
+  "binomial"), weights = NULL, basis.type = c("poly", "trig", "wave"))
 }
 \arguments{
 \item{x}{A univariate vector representing the predictor.}
