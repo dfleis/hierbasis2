@@ -3,4 +3,5 @@ useDynLib(hierbasis2)
 importFrom(Rcpp, evalCpp)
 import(Matrix)
 
-export(hierbasis)
+export(hierbasis, print.hierbasis, predict.hierbasis,
+       cv.hierbasis, plot.cv.hierbasis)

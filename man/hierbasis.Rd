@@ -32,7 +32,8 @@ estimators (computed on a base-10 \eqn{log} scale). Default:
 
 \item{m.const}{Smoothing parameter controlling the degree of polynomial
 smoothing/decay performed by the weights in the penalty
-\eqn{\Omega}.Default: \code{m.const = 3}.}
+\eqn{\Omega}.Default: \code{m.const = 3}. Only relevant if
+\code{weights} is left unspecified.}
 
 \item{type}{Specifies either Gaussian regression (\code{"gaussian"})
 with a continuous response vector or binomial regression
@@ -45,7 +46,28 @@ weights \eqn{w_{k, m}}. If left unspecified
 \eqn{w_{k, m} = k^m - (k - 1)^m}.}
 }
 \value{
-Returns an object of class \code{hierbasis} with elements (to finish...)
+Returns an object of class \code{hierbasis} with elements (to finish...):
+
+\item{x, y}{The original \code{x} and \code{y} used as inputs.}
+\item{m.const}{The parameter \code{m.const} used for smoothing.}
+\item{nbasis}{The maximum number of basis functions used for computing
+the basis expansion of \code{x}.}
+\item{basis.expansion}{The \code{n * nbasis}-matrix containing the basis
+expansion of \code{x}, with column indices corresponding to
+increasing basis function complexity.}
+\item{basis.expansion.means}{The \code{nbasis}-vector containing the
+columnwise means of the basis expansion.}
+\item{ybar}{Mean of the response vector.}
+\item{lambdas}{Sequence of tuning parameters \eqn{lambda} used for
+penalizing the fits.}
+\item{intercept}{The \code{nlam}-vector of estimated intercepts \eqn{\beta_0}.}
+\item{beta}{The \code{nbasis * nlam}-matrix of estimated linear coefficients.}
+\item{fitted.values}{The \code{nbasis * nlam}-matrix of fitted responses.}
+\item{weights}{The weights used for smoothing/penalizing the basis functions.}
+\item{active}{The size of the active set (number of nonzero \eqn{\beta}).}
+\item{type}{The specified family \code{'gaussian'} or \code{'binomial'}.}
+\item{basis.type}{Specified basis expansion family, polynomial,
+trigonometric, or wavelet.}
 }
 \description{
 Univariate Nonparametric Regression Estimation
