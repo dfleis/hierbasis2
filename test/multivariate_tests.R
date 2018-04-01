@@ -39,15 +39,16 @@ plot(y ~ X[,1], pch = 19, cex = 0.75,
 #===== fit models =====#
 #======================#
 pt <- proc.time()
-mod1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 15)
+mod1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 10)
 proc.time() - pt
 
 pt <- proc.time()
-mod2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 15)
+mod2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 10)
 proc.time() - pt
 
-yhat1 <- predict(mod1)
-yhat2 <- predict(mod2)
+new.X <- matrix(rnorm(5 * p), ncol = p)
+yhat1 <- predict(mod1, new.X)
+yhat2 <- predict(mod2, new.X)
 sum(abs(yhat1 - yhat2))
 
 pt <- proc.time()

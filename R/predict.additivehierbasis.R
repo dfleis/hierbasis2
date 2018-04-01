@@ -40,9 +40,7 @@ predict.additivehierbasis <- function(object, new.X = NULL, ...) {
   if (is.null(new.X)) {
     object$fitted.values
   } else {
-    X      <- new.X
-    n.new  <- dim(new.X)[1]
-
+    n.new      <- dim(new.X)[1]
     n          <- nrow(object$X)
     p          <- ncol(object$X)
     nlam       <- length(object$lambdas)
@@ -51,9 +49,9 @@ predict.additivehierbasis <- function(object, new.X = NULL, ...) {
 
     # generate design matrices
     basis.expand.out <- basis.expand.multivar(new.X, K, basis.type)
-    PSI.array <- basis.expand.out$PSI.array
+    PSI.array        <- basis.expand.out$PSI.array
 
-    # compute X %*% beta values.
+    # compute X %*% beta values
     ans <- Matrix::crossprod(apply(PSI.array, 1, cbind), object$beta)
 
     # add intercept

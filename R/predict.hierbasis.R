@@ -47,9 +47,7 @@
 predict.hierbasis <- function(object,
                               new.x       = NULL,
                               interpolate = FALSE, ...) {
-  # TO DO: I don't think interpolate will work correctly
-  #        for nonpolynomial bases... check this.
-  nlam <- length(object$lambdas)  # Number of lambdas.
+  nlam <- length(object$lambdas)
 
   if (is.null(new.x)) {
     # return fitted.response if no new predictors are supplied

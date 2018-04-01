@@ -67,7 +67,39 @@
 #' @return
 #' An object of class additivehierbasis with the following elements
 #'
-#' \item{to do...}{to do...}
+#' \item{X, y}{The original \code{X} and \code{y} used as inputs.}
+#' \item{beta}{The \code{(nbasis * p)}-by-\code{nlam}-matrix of the estimated
+#' linear coefficients \eqn{beta}}.
+#' \item{beta.array}{The \code{nbasis * p * nlam}-array of the estimated
+#' linear coefficients.}
+#' \item{intercept}{The \code{nlam}-vector of estimated intercepts \eqn{\beta_0}.}
+#' \item{fitted.values}{The \code{n * nlam} matrix of fitted values.}
+#' \item{basis.expansion}{The \code{n * nbasis * p}-array containing the basis
+#' expansion of \code{X}. Second-dimension indices correspond to
+#' increasing basis function complexity and third-dimension indices correspond
+#' to each of the \eqn{p} covariates of \code{X}.}
+#' \item{basis.expansion.means}{The \code{nbasis * p}-vector containing the
+#' second-dimension-wise means of the basis expansion.}
+#' \item{ybar}{Mean of the response vector.}
+#' \item{lambdas}{Sequence of tuning parameters \eqn{lambda} used for
+#' penalizing the fits.}
+#' \item{fitted.values}{The \code{nbasis * nlam}-matrix of fitted responses.}
+#' \item{alpha}{The scalar controlling the balance between the sparsity-inducing
+#' penalty and the hierarchical-sparsity-inducing penalty.}
+#' \item{m.const}{The \code{m.const} value used for defining 'order' of smoothness.}
+#' \item{nbasis}{The maximum number of basis functions used for computing
+#' the basis expansion of \code{x}.}
+#' \item{max.iter}{Maximum number of iterations used for the block coordinate
+#' descent algorithm.}
+#' \item{tol}{Tolerance/stopping precision used for block coordinate descent.}
+#' \item{weights}{The weights used for smoothing/penalizing the basis functions.}
+#' \item{active}{The size of the active set (number of nonzero \eqn{\beta})
+#' per tuning parameter \eqn{\lambda}.}
+#' \item{active.mat}{The size of the active set per predictor (rowwise),
+#' per tuning parameter \eqn{\lambda} (columnwise).}
+#' \item{type}{The specified family \code{'gaussian'} or \code{'binomial'}.}
+#' \item{basis.type}{Specified basis expansion family, polynomial,
+#' trigonometric, or wavelet.}
 #'
 #' @author Annik Gougeon,
 #' David Fleischer (\email{david.fleischer@@mail.mcgill.ca}).
@@ -137,35 +169,48 @@ additivehierbasis <- function(X, y,
                        max_iter      = max.iter,
                        beta_is_zero  = beta_is_zero,
                        active_set    = colSums((beta.mat != 0) * 1))
-    beta2 <- mod$beta
+    # betahat is a (nbasis * p)-rows by nlam-columns matrix of fitted
+    # coefficients
+    betahat       <- mod$beta
+    betahat.array <- array(betahat, dim = c(nbasis, p, nlam))
 
     # compute intercepts
-    intercept <- as.vector(ybar - (as.vector(PSIbar) %*% beta2))
+    intercept <- as.vector(ybar - (as.vector(PSIbar) %*% betahat))
 
     # fit response vector for each lambda
-    yhats <- Matrix::crossprod(apply(PSI.c.array, 1, cbind), beta2) + ybar
+    yhats <- Matrix::crossprod(apply(PSI.c.array, 1, cbind), betahat) + ybar
 
+    # NOTE: What's the best way of computing the active set?
+    # Should we just count the total number of nonzero coefficients
+    # per tuning parameter lambda? Or should we compute number of nonzero
+    # coefficients per predictor per tuning paramter
+    active.set <- colSums(as.matrix(betahat) != 0)
+    active.set.mat <- apply(betahat.array, 3, function(b) colSums(b != 0))
 
     # Finally, we return an additivehierbasis object.
     out <- list()
-    out$X             <- X
-    out$y             <- y
-    out$beta          <- beta2
-    out$intercept     <- intercept
-    out$nbasis        <- nbasis
-    out$fitted.values <- yhats
-    out$ybar          <- ybar
-    out$xbar          <- PSIbar
+    out$X                     <- X
+    out$y                     <- y
+    out$beta                  <- betahat
+    out$beta.array            <- betahat.array
+    out$intercept             <- intercept
+    out$fitted.values         <- yhats
+    out$basis.expansion       <- PSI.array
+    out$basis.expansion.means <- PSIbar
+    out$ybar                  <- ybar
 
-    out$lambdas       <- mod$lambdas
-    out$alpha         <- alpha
-    out$m.const       <- m.const
-    out$max.iter      <- max.iter
-    out$tol           <- tol
-    out$weights       <- w
-    out$type          <- type[1]
-    out$basis.type    <- basis.type[1]
-    out$call          <- match.call()
+    out$lambdas    <- mod$lambdas
+    out$alpha      <- alpha
+    out$m.const    <- m.const
+    out$nbasis     <- nbasis
+    out$max.iter   <- max.iter
+    out$tol        <- tol
+    out$weights    <- w
+    out$active     <- active.set
+    out$active.mat <- active.set.mat
+    out$type       <- type[1]
+    out$basis.type <- basis.type[1]
+    out$call       <- match.call()
 
   } else if (type[1] == "binomial") {
     # logistic regression analogue

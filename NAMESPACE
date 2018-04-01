@@ -3,7 +3,7 @@ useDynLib(hierbasis2)
 importFrom(Rcpp, evalCpp)
 import(Matrix)
 
-export(hierbasis, print.hierbasis, predict.hierbasis,
-       cv.hierbasis, plot.cv.hierbasis,
+export(hierbasis, print.hierbasis, predict.hierbasis, coef.hierbasis,
+       cv.hierbasis, predict.cv.hierbasis, coef.cv.hierbasis, plot.cv.hierbasis,
        additivehierbasis, predict.additivehierbasis,
        cv.additivehierbasis, plot.cv.additivehierbasis)

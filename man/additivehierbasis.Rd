@@ -69,7 +69,39 @@ to a polynomial expansion.}
 \value{
 An object of class additivehierbasis with the following elements
 
-\item{to do...}{to do...}
+\item{X, y}{The original \code{X} and \code{y} used as inputs.}
+\item{beta}{The \code{(nbasis * p)}-by-\code{nlam}-matrix of the estimated
+linear coefficients \eqn{beta}}.
+\item{beta.array}{The \code{nbasis * p * nlam}-array of the estimated
+linear coefficients.}
+\item{intercept}{The \code{nlam}-vector of estimated intercepts \eqn{\beta_0}.}
+\item{fitted.values}{The \code{n * nlam} matrix of fitted values.}
+\item{basis.expansion}{The \code{n * nbasis * p}-array containing the basis
+expansion of \code{X}. Second-dimension indices correspond to
+increasing basis function complexity and third-dimension indices correspond
+to each of the \eqn{p} covariates of \code{X}.}
+\item{basis.expansion.means}{The \code{nbasis * p}-vector containing the
+second-dimension-wise means of the basis expansion.}
+\item{ybar}{Mean of the response vector.}
+\item{lambdas}{Sequence of tuning parameters \eqn{lambda} used for
+penalizing the fits.}
+\item{fitted.values}{The \code{nbasis * nlam}-matrix of fitted responses.}
+\item{alpha}{The scalar controlling the balance between the sparsity-inducing
+penalty and the hierarchical-sparsity-inducing penalty.}
+\item{m.const}{The \code{m.const} value used for defining 'order' of smoothness.}
+\item{nbasis}{The maximum number of basis functions used for computing
+the basis expansion of \code{x}.}
+\item{max.iter}{Maximum number of iterations used for the block coordinate
+descent algorithm.}
+\item{tol}{Tolerance/stopping precision used for block coordinate descent.}
+\item{weights}{The weights used for smoothing/penalizing the basis functions.}
+\item{active}{The size of the active set (number of nonzero \eqn{\beta})
+per tuning parameter \eqn{\lambda}.}
+\item{active.mat}{The size of the active set per predictor (rowwise),
+per tuning parameter \eqn{\lambda} (columnwise).}
+\item{type}{The specified family \code{'gaussian'} or \code{'binomial'}.}
+\item{basis.type}{Specified basis expansion family, polynomial,
+trigonometric, or wavelet.}
 }
 \description{
 The main function for fitting sparse additive models via the additive

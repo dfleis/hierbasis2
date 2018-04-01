@@ -43,8 +43,19 @@ pt <- proc.time()
 mod2 <- hierbasis2::hierbasis(x = x, y = y, nbasis = 10)
 proc.time() - pt
 
+beta.mod2 <-  coef(mod2)
+plot(NA, log = 'x',
+     xlim = range(mod2$lambdas),
+     ylim = range(beta.mod2),
+     xlab = expression(log(lambda)),
+     ylab = expression(beta))
+lines(beta.mod2[1,] ~ mod2$lambdas, lwd = 1.5, col = 'black', lty = 'dashed')
+for (k in 2:nrow(beta.mod2)) {
+  lines(beta.mod2[k,] ~ mod2$lambdas, lwd = 1.5, col = 'darkblue')
+}
 
-mod2$nbasis
+
+
 x.new <- rnorm(10)
 yhat1 <- predict(mod1, x.new)
 yhat2 <- predict(mod2, x.new)
