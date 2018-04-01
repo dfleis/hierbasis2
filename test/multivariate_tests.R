@@ -9,9 +9,9 @@ library(hierbasis2)
 #===== generate data =====#
 #=========================#
 set.seed(1)
-n <- 300
+n <- 500
 p <- 6
-sigma <- 0.3
+sigma <- 1
 
 X <- matrix(rnorm(n * p), nrow = n)
 eps <- rnorm(n, 0, sigma)
@@ -20,7 +20,7 @@ eps <- rnorm(n, 0, sigma)
 # y = sum^p_{j = 1} y_j = sum^p_{j = 1} f_j(X[,j])
 y1 <- 2 * sin(X[, 1])
 y2 <- X[, 2]
-y3 <- (X[, 3])^3/10
+y3 <- (X[, 3])^3/10 + sin(-0.5 * pi * X[,3])
 
 ytrue <- y1 + y2 + y3
 y <- ytrue + eps

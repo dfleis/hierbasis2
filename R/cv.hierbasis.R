@@ -47,7 +47,6 @@ cv.hierbasis <- function(x, y, lambdas = NULL, nfolds = 10, ...) {
 
     # compute training model and training error
     mod.cv <- hierbasis(x = x.trn, y = y.trn,
-                        nbasis        = mod.init$nbasis,
                         nlam          = mod.init$nlam,
                         max.lambda    = mod.init$max.lambda,
                         lam.min.ratio = mod.init$lam.min.ratio, ...)
