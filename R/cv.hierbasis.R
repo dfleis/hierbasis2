@@ -83,14 +83,14 @@ cv.hierbasis <- function(x, y, lambdas = NULL, nfolds = 10, ...) {
 
 
   out <- list()
-  out$hierbasis.fit  <- mod.init$mod.init
-  out$train.err      <- train.err
-  out$test.err       <- test.err
-  out$test.err.se    <- test.err.se
-  out$test.err.hi    <- test.err.hi
-  out$test.err.lo    <- test.err.lo
-  out$lambdas        <- mod.init$lambdas
-  out$loss.func      <- "rmse" # to do... generalize...
+  out$model.fit   <- mod.init$mod.init
+  out$train.err   <- train.err
+  out$test.err    <- test.err
+  out$test.err.se <- test.err.se
+  out$test.err.hi <- test.err.hi
+  out$test.err.lo <- test.err.lo
+  out$lambdas     <- mod.init$lambdas
+  out$loss.func   <- "rmse" # to do... generalize...
   out <- c(out, best.lambdas)
 
   class(out) <- "cv.hierbasis"

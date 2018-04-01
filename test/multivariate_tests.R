@@ -54,6 +54,8 @@ pt <- proc.time()
 cv.mod2 <- hierbasis2::cv.additivehierbasis(X = X, y = y, nbasis = 15, nfolds = 10)
 proc.time() - pt
 
+plot(cv.mod2)
+
 #==================#
 #==== figures =====#
 #==================#

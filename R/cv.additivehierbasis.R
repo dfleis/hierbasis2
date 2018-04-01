@@ -80,14 +80,14 @@ cv.additivehierbasis <- function(X, y, lambdas = NULL, nfolds = 10, ...) {
   best.lambdas <- getmin.lambda(mod.init$lambdas, test.err, test.err.se)
 
   out <- list()
-  out$additivehierbasis.fit <- mod.init$model.fit$mod.init
-  out$train.err             <- train.err
-  out$test.err              <- test.err
-  out$test.err.se           <- test.err.se
-  out$test.err.hi           <- test.err.hi
-  out$test.err.lo           <- test.err.lo
-  out$lambdas               <- mod.init$lambdas
-  out$loss.func             <- "rmse" # to do... generalize...
+  out$model.fit   <- mod.init$model.fit$mod.init
+  out$train.err   <- train.err
+  out$test.err    <- test.err
+  out$test.err.se <- test.err.se
+  out$test.err.hi <- test.err.hi
+  out$test.err.lo <- test.err.lo
+  out$lambdas     <- mod.init$lambdas
+  out$loss.func   <- "rmse" # to do... generalize...
   out <- c(out, best.lambdas)
 
   class(out) <- "cv.additivehierbasis"

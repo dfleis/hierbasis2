@@ -27,7 +27,7 @@ plot.cv.hierbasis <- function(cv.obj, sign.lambda = 1, ...) {
          pch = 20, col = 'red')
   axis(side   = 3,
        at     = sign.lambda * log(cv.obj$lambdas),
-       labels = paste(cv.obj$hierbasis.fit$active),
+       labels = paste(cv.obj$model.fit$active),
        tick   = F,
        line   = 0)
   abline(v = sign.lambda * log(cv.obj$lambda.min), lty = 3)
