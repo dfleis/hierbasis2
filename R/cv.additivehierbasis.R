@@ -1,11 +1,11 @@
-#' Cross-validation for Univariate hierbasis
+#' Cross-validation for Multivariate additivehierbasis Models
 #'
 #' @details The function runs \code{nfolds} + 1 times. If \code{lambdas}
 #'          is not specified then it uses the first run to find the
 #'          sequence of \code{lambdas}. The remaining \code{nfolds}
 #'          runs are done using the fold subsets as usual.
 #'
-#' @param x A univariate vector representing the predictor.
+#' @param X An \eqn{n \times p}{n x p} matrix of covariates.
 #' @param y A univariate vector respresenting the response.
 #' @param lambda (Optional) User-specified sequence of tuning parameters \eqn{lambda}.
 #' @param nfolds Number of cross-validation folds. Default: \code{nfolds = 10}.
@@ -24,13 +24,13 @@
 #' Adaptive Smoothness via a Convex Hierarchical Penalty. Available on request
 #' by authors.
 #'
-cv.hierbasis <- function(x, y, lambdas = NULL, nfolds = 10, ...) {
+cv.additivehierbasis <- function(x, y, lambdas = NULL, nfolds = 10, ...) {
   # TO DO: Allow for other loss functions than rmse.
   # TO DO: Allow for parallel computing (foreach library?).
   # TO DO: Split some overhead off in its own function.
 
   n <- length(y)
-  mod.init <- cv.init(x, y, lambdas, ...)
+  mod.init <- cv.init(x = X, y = y, lambdas = lambdas, ...)
 
   # assign observations to cross-validation
   # fold 1, ..., nfolds
@@ -42,18 +42,18 @@ cv.hierbasis <- function(x, y, lambdas = NULL, nfolds = 10, ...) {
   cv.err <- sapply(train.idx, function(trn) {
     tst <- !trn # test subset indices
 
-    x.trn <- x[trn]; y.trn <- y[trn]
-    x.tst <- x[tst]; y.tst <- y[tst]
+    X.trn <- X[trn,]; y.trn <- y[trn]
+    X.tst <- X[tst,]; y.tst <- y[tst]
 
     # compute training model and training error
-    mod.cv <- hierbasis(x = x.trn, y = y.trn,
-                        nbasis        = mod.init$nbasis,
-                        nlam          = mod.init$nlam,
-                        max.lambda    = mod.init$max.lambda,
-                        lam.min.ratio = mod.init$lam.min.ratio, ...)
+    mod.cv <- additivehierbasis(X = X.trn, y = y.trn,
+                                nbasis        = mod.init$model.fit$nbasis,
+                                nlam          = mod.init$nlam,
+                                max.lambda    = mod.init$max.lambda,
+                                lam.min.ratio = mod.init$lam.min.ratio, ...)
 
     yhat.trn <- mod.cv$fitted.values # extract training fits
-    yhat.tst <- predict(mod.cv, new.x = x.tst) # compute test fits
+    yhat.tst <- predict(mod.cv, new.X = X.tst) # compute test fits
 
     # compute errors
     if (mod.cv$type[1] == "binomial") {
@@ -79,20 +79,18 @@ cv.hierbasis <- function(x, y, lambdas = NULL, nfolds = 10, ...) {
   test.err.lo <- test.err - test.err.se
 
   best.lambdas <- getmin.lambda(mod.init$lambdas, test.err, test.err.se)
-  best.lambdas
-
 
   out <- list()
-  out$hierbasis.fit  <- mod.init$mod.init
-  out$train.err      <- train.err
-  out$test.err       <- test.err
-  out$test.err.se    <- test.err.se
-  out$test.err.hi    <- test.err.hi
-  out$test.err.lo    <- test.err.lo
-  out$lambdas        <- mod.init$lambdas
-  out$loss.func      <- "rmse" # to do... generalize...
+  out$additivehierbasis.fit <- mod.init$model.fit$mod.init
+  out$train.err             <- train.err
+  out$test.err              <- test.err
+  out$test.err.se           <- test.err.se
+  out$test.err.hi           <- test.err.hi
+  out$test.err.lo           <- test.err.lo
+  out$lambdas               <- mod.init$lambdas
+  out$loss.func             <- "rmse" # to do... generalize...
   out <- c(out, best.lambdas)
 
-  class(out) <- "cv.hierbasis"
+  class(out) <- "cv.additivehierbasis"
   out
 }

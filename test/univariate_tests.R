@@ -17,7 +17,7 @@ f4 <- function(z) -2 * cos(1 * pi * z)
 #===== generate data =====#
 #=========================#
 set.seed(124)
-n <- 1e3
+n <- 250
 sigma <- 0.5
 
 x <- sort(runif(n, -3, 3)) # sort just to make plotting easier later
@@ -42,6 +42,8 @@ proc.time() - pt
 pt <- proc.time()
 mod2 <- hierbasis2::hierbasis(x = x, y = y, nbasis = 10)
 proc.time() - pt
+
+
 mod2$nbasis
 x.new <- rnorm(10)
 yhat1 <- predict(mod1, x.new)
@@ -52,7 +54,7 @@ sum(abs(yhat1 - yhat2))
 
 
 pt <- proc.time()
-cv.mod2 <- cv.hierbasis(x, y, nbasis = 10, nfolds = 20)
+cv.mod2 <- cv.hierbasis(x, y, nbasis = 10, nfolds = 10)
 proc.time() - pt
 
 yhat1 <- predict(mod1)

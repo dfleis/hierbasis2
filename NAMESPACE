@@ -5,4 +5,5 @@ import(Matrix)
 
 export(hierbasis, print.hierbasis, predict.hierbasis,
        cv.hierbasis, plot.cv.hierbasis,
-       additivehierbasis, predict.additivehierbasis)
+       additivehierbasis, predict.additivehierbasis,
+       cv.additivehierbasis)
