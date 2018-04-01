@@ -150,7 +150,7 @@ hierbasis <- function(x, y,
     out$intercept     <- intercept
     out$beta          <- betahat
     out$fitted.values <- t(yhat)
-    out$n.active      <- active.set
+    out$active        <- active.set
     out$call          <- match.call()
 
   } else if (type[1] == "binomial") {
@@ -169,7 +169,7 @@ hierbasis <- function(x, y,
 print.hierbasis <- function(x, digits = 3, ...) {
   cat("\nCall: ", deparse(x$call), "\n\n")
   print(cbind(Lambda = signif(x$lambdas, digits),
-              Deg.of.Poly = x$n.active))
+              Deg.of.Poly = x$active))
 }
 
 #' Model Predictions for the Univariate hierbasis model
