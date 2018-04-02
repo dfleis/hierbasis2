@@ -43,8 +43,10 @@ mod.hb1 <- HierBasis::HierBasis(x = x, y = y, nbasis = 10)
 proc.time() - pt
 
 pt <- proc.time()
-mod.hb2 <- hierbasis2::hierbasis(x = x, y = y, nbasis = 10)
+mod.hb2 <- hierbasis2::hierbasis(x = x, y = y, nbasis = 10, basis.type = "wave")
 proc.time() - pt
+
+mod.hb2$fitted.values - mod.hb1$fitted.values
 
 yhat.glmnet <- predict(mod.glmnet, newx = cbind(1, x))
 yhat.hb1    <- predict(mod.hb1)
@@ -53,27 +55,11 @@ yhat.hb2    <- predict(mod.hb2)
 plot(mod.hb2, sign.lambda = -1, label = F)
 
 
-
-beta.mod2 <- coef(mod2)
-plot(NA, log = 'x',
-     xlim = range(mod2$lambdas),
-     ylim = range(beta.mod2),
-     xlab = expression(log(lambda)),
-     ylab = expression(beta))
-lines(beta.mod2[1,] ~ mod2$lambdas, lwd = 1.5, col = 'black', lty = 'dashed')
-for (k in 2:nrow(beta.mod2)) {
-  lines(beta.mod2[k,] ~ mod2$lambdas, lwd = 1.5, col = 'darkblue')
-}
-
-
-
 x.new <- rnorm(10)
-yhat1 <- predict(mod1, x.new)
-yhat2 <- predict(mod2, x.new)
+yhat1 <- predict(mod.hb1, x.new)
+yhat2 <- predict(mod.hb2, x.new)
 
 sum(abs(yhat1 - yhat2))
-
-
 
 pt <- proc.time()
 cv.mod2 <- cv.hierbasis(x, y, nbasis = 10, nfolds = 10)

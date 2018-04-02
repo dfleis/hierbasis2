@@ -49,7 +49,7 @@ mod.ahb1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 20)
 proc.time() - pt
 
 pt <- proc.time()
-mod.ahb2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 20)
+mod.ahb2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 20, basis.type = "trig")
 proc.time() - pt
 
 pt <- proc.time()
@@ -63,6 +63,8 @@ plot(mod.ahb2,
      plot.stat   = "coef",
      plot.type   = "image",
      legend      = T)
+
+
 plot.active.additivehierbasis(mod.ahb2, plot.type = "lines")
 plot.coef.additivehierbasis(mod.ahb2, pred.idx = 1)
 
