@@ -58,10 +58,11 @@ proc.time() - pt
 
 print(mod.ahb2)
 plot(mod.ahb2,
+     pred.idx    = 2,
      sign.lambda = -1,
-     plot.stat = "coef",
-     plot.type = "image",
-     pred.idx  = 2)
+     plot.stat   = "coef",
+     plot.type   = "image",
+     legend      = T)
 plot.active.additivehierbasis(mod.ahb2, plot.type = "lines")
 plot.coef.additivehierbasis(mod.ahb2, pred.idx = 1)
 

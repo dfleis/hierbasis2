@@ -2,8 +2,11 @@ plot.coef.additivehierbasis <- function(mod,
                                         pred.idx,
                                         sign.lambda = 1,
                                         plot.type   = c("image", "lines"),
-                                        col.image   = redblue.grad(64),
+                                        col.image   = redblue.grad(65),
                                         legend      = F, ...) {
+  # reblue.grad() should be given an odd number so that the
+  # midpoint will be associated with the white midpoint
+  # between 'red' and 'blue
   if (length(pred.idx) != 1) {
     stop("Error in plot.coef.additivehierbasis(): Parameter 'pred.idx' must be a single positive integer in the range of 0, 1, ..., p, where pred.idx = 0 corresponds to the intercept.")
   }
