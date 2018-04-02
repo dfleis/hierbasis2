@@ -4,6 +4,7 @@ importFrom(Rcpp, evalCpp)
 import(Matrix)
 import(foreach)
 importFrom(fields, image.plot)
+importFrom(grDevices, colorRamp, colorRampPalette)
 
 export(hierbasis,
        print.hierbasis, predict.hierbasis, coef.hierbasis, plot.hierbasis,
@@ -11,7 +12,7 @@ export(hierbasis,
        predict.cv.hierbasis, coef.cv.hierbasis, plot.cv.hierbasis,
        additivehierbasis,
        print.additivehierbasis, predict.additivehierbasis, coef.additivehierbasis, plot.additivehierbasis,
+       plot.active.additivehierbasis, plot.coef.additivehierbasis,
        cv.additivehierbasis,
        predict.cv.additivehierbasis, coef.cv.additivehierbasis, plot.cv.additivehierbasis,
-       parula,
-       plot.active.additivehierbasis)
+       parula, redblue.grad)

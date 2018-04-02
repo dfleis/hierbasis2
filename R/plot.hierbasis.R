@@ -17,9 +17,12 @@ plot.hierbasis <- function(mod,
   new.args <- list(...)
   if (length(new.args)) plot.args[names(new.args)] <- new.args
 
-  top.x <- pretty(plot.args$x, shrink.sml = 5)
-  top.labs <- approx(x = plot.args$x, y = mod$active, xout = top.x,
-                     rule = 2, method = "constant", f = 1)
+  top.x    <- pretty(plot.args$x, n = length(pretty(plot.args$x)) + 2)
+  top.labs <- approx(x = plot.args$x, y = mod$active,
+                     xout   = top.x,
+                     rule   = 2,
+                     method = "constant",
+                     f      = 1)
 
   xlim <- range(plot.args$x)
   ylim <- range(plot.args$y)

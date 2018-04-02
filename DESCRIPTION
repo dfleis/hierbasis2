@@ -2,16 +2,18 @@ Package: hierbasis2
 Type: Package
 Title: Rebuilding Nonparametric Regression and Sparse Additive Modeling
 Version: 0.1.0
-Author: Annik Gougeon, David Fleischer
+Author: Annik Gougeon [ctb], 
+        David Fleischer [aut, cre]
 Maintainer: David Fleischer <david.fleischer@mail.mcgill.ca>
 Description: Rebuilding Haris et al. (2016)'s HierBasis package 
   (See https://github.com/asadharis/HierBasis for details).
 Depends:
-  R (>= 3.4)
-Imports:
-  Rcpp (>= 0.12.2), 
+  R (>= 3.4),
   Matrix,
-  foreach
+  foreach,
+  grDevices
+Imports:
+  Rcpp (>= 0.12.2)
 LinkingTo:
   Rcpp,
   RcppArmadillo

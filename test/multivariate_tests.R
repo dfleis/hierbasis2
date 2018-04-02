@@ -57,7 +57,13 @@ cv.mod2 <- hierbasis2::cv.additivehierbasis(X = X, y = y, nbasis = 20, nfolds = 
 proc.time() - pt
 
 print(mod.ahb2)
-plot.active.additivehierbasis(mod.ahb2)
+plot(mod.ahb2,
+     sign.lambda = -1,
+     plot.stat = "coef",
+     plot.type = "image",
+     pred.idx  = 2)
+plot.active.additivehierbasis(mod.ahb2, plot.type = "lines")
+plot.coef.additivehierbasis(mod.ahb2, pred.idx = 1)
 
 new.X <- matrix(rnorm(10 * p), ncol = p)
 yhat1 <- predict(mod1, new.X)

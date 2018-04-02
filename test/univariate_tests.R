@@ -50,7 +50,7 @@ yhat.glmnet <- predict(mod.glmnet, newx = cbind(1, x))
 yhat.hb1    <- predict(mod.hb1)
 yhat.hb2    <- predict(mod.hb2)
 
-plot(mod.hb2, sign.lambda = -1, label = T)
+plot(mod.hb2, sign.lambda = -1, label = F)
 
 
 
