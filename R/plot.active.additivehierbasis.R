@@ -1,6 +1,7 @@
 plot.active.additivehierbasis <- function(mod,
                                           sign.lambda = 1,
                                           plot.type   = c("image", "lines"),
+                                          col.image   = parula(64),
                                           legend      = F, ...) {
   p          <- ncol(mod$X)
   lambdas    <- mod$lambdas
@@ -22,22 +23,13 @@ plot.active.additivehierbasis <- function(mod,
       active.flip <- apply(active.flip, 2, rev)
       xax         <- rev(xax)
     }
-
-    if (legend) {
-      image.plot(x    = xax,
-                 y    = 1:p,
-                 z    = active.flip,
-                 col  = parula(64),
-                 xlab = plot.args$xlab,
-                 ylab = "Covariate")
-    } else {
-      image(x    = xax,
-            y    = 1:p,
-            z    = active.flip,
-            col  = parula(64),
-            xlab = plot.args$xlab,
-            ylab = "Covariate")
-    }
+    image.mat(x      = xax,
+              y      = 1:p,
+              z      = active.flip,
+              legend = legend,
+              col    = col.image,
+              xlab   = plot.args$xlab,
+              ylab   = "Covariate")
 
   } else if (plot.type[1] == "lines") {
     plot(NA,

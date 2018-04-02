@@ -57,7 +57,7 @@ cv.mod2 <- hierbasis2::cv.additivehierbasis(X = X, y = y, nbasis = 20, nfolds = 
 proc.time() - pt
 
 print(mod.ahb2)
-plot.active.additivehierbasis(mod.ahb2, sign.lambda = -1)
+plot.active.additivehierbasis(mod.ahb2)
 
 new.X <- matrix(rnorm(10 * p), ncol = p)
 yhat1 <- predict(mod1, new.X)
