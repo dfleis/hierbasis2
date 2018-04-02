@@ -52,10 +52,9 @@ predict.additivehierbasis <- function(object, new.X = NULL, ...) {
     PSI.array        <- basis.expand.out$PSI.array
 
     # compute X %*% beta values
-    ans <- Matrix::crossprod(apply(PSI.array, 1, cbind), object$beta)
-
-    # add intercept
-    ans.out <- t(apply(ans, 1, "+", object$intercept))
+    # add intercept term to design matrix
+    PSI.intercept <- rbind(1, apply(PSI.array, 1, cbind))
+    ans.out <- Matrix::crossprod(PSI.intercept, coef(object, as.arr = F, ...))
 
     if (object$type[1] == "gaussian") {
       return (ans.out)

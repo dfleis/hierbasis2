@@ -11,7 +11,7 @@ library(hierbasis2)
 set.seed(1)
 n <- 500
 p <- 6
-sigma <- 1
+sigma <- 0
 
 X <- matrix(rnorm(n * p), nrow = n)
 eps <- rnorm(n, 0, sigma)
@@ -20,7 +20,7 @@ eps <- rnorm(n, 0, sigma)
 # y = sum^p_{j = 1} y_j = sum^p_{j = 1} f_j(X[,j])
 y1 <- 2 * sin(X[, 1])
 y2 <- X[, 2]
-y3 <- (X[, 3])^3/10 + sin(-0.5 * pi * X[,3])
+y3 <- 0.25 * X[,3]^2 - 3 * exp(-X[,3]^10) + cos(X[,3])
 
 ytrue <- y1 + y2 + y3
 y <- ytrue + eps
@@ -32,30 +32,34 @@ plot(y2 ~ X[,2], pch = 19, cex = 0.75,
 plot(y3 ~ X[,3], pch = 19, cex = 0.75,
      col = rgb(0, 0, 0, 0.5))
 
-plot(y ~ X[,1], pch = 19, cex = 0.75,
+plot(y ~ X[,3], pch = 19, cex = 0.75,
      col = rgb(0, 0, 0, 0.5))
 
 #======================#
 #===== fit models =====#
 #======================#
 pt <- proc.time()
-mod1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 10)
+mod1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 20)
 proc.time() - pt
 
 pt <- proc.time()
-mod2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 10)
+mod2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 20)
 proc.time() - pt
 
-new.X <- matrix(rnorm(5 * p), ncol = p)
+pt <- proc.time()
+cv.mod2 <- hierbasis2::cv.additivehierbasis(X = X, y = y, nbasis = 20, nfolds = 10)
+proc.time() - pt
+
+
+new.X <- matrix(rnorm(10 * p), ncol = p)
 yhat1 <- predict(mod1, new.X)
-yhat2 <- predict(mod2, new.X)
-sum(abs(yhat1 - yhat2))
+yhat2 <- predict(mod2, new.X = new.X, lam.idx = cv.mod2$lambda.1se.idx)
+yhat1[,cv.mod2$lambda.1se.idx] - yhat2
 
-pt <- proc.time()
-cv.mod2 <- hierbasis2::cv.additivehierbasis(X = X, y = y, nbasis = 15, nfolds = 10)
-proc.time() - pt
-
-plot(cv.mod2)
+yh2.0 <- predict(mod2, new.X = new.X, lam.idx = cv.mod2$lambda.1se.idx)
+yh2.1 <- predict(cv.mod2, new.X = new.X, lam.idx = cv.mod2$lambda.1se.idx)
+yh2.2 <- predict(cv.mod2, new.X = new.X)
+yh2.0 - yh2.2
 
 #==================#
 #==== figures =====#
