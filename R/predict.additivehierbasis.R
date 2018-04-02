@@ -34,12 +34,18 @@
 #' Haris et al. (2016) can be found via
 #' \url{https://github.com/asadharis/HierBasis/}.
 #'
-predict.additivehierbasis <- function(object, new.X = NULL, ...) {
+predict.additivehierbasis <- function(object,
+                                      new.X   = NULL,
+                                      lam.idx = NULL, ...) {
+  if (is.null(lam.idx)) {
+    lam.idx <- 1:length(object$lambdas)
+  }
 
-  # initialize & extract some variables
   if (is.null(new.X)) {
-    object$fitted.values
+    object$fitted.values[,lam.idx]
+
   } else {
+    # initialize & extract some variables
     n.new      <- dim(new.X)[1]
     n          <- nrow(object$X)
     p          <- ncol(object$X)
@@ -54,7 +60,7 @@ predict.additivehierbasis <- function(object, new.X = NULL, ...) {
     # compute X %*% beta values
     # add intercept term to design matrix
     PSI.intercept <- rbind(1, apply(PSI.array, 1, cbind))
-    ans.out <- Matrix::crossprod(PSI.intercept, coef(object, as.arr = F, ...))
+    ans.out <- Matrix::crossprod(PSI.intercept, coef(object, lam.idx = lam.idx, as.arr = F, ...))
 
     if (object$type[1] == "gaussian") {
       return (ans.out)

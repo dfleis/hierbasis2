@@ -43,7 +43,7 @@ mod.hb1 <- HierBasis::HierBasis(x = x, y = y, nbasis = 10)
 proc.time() - pt
 
 pt <- proc.time()
-mod.hb2 <- hierbasis2::hierbasis(x = x, y = y, nbasis = 10, basis.type = "wave")
+mod.hb2 <- hierbasis2::hierbasis(x = x, y = y, nbasis = 10)
 proc.time() - pt
 
 mod.hb2$fitted.values - mod.hb1$fitted.values
@@ -56,10 +56,8 @@ plot(mod.hb2, sign.lambda = -1, label = F)
 
 
 x.new <- rnorm(10)
-yhat1 <- predict(mod.hb1, x.new)
-yhat2 <- predict(mod.hb2, x.new)
-
-sum(abs(yhat1 - yhat2))
+yhat1 <- predict(mod.hb1, new.x = x.new)
+yhat2 <- predict(mod.hb2, new.x = x.new, lam.idx = 10)
 
 pt <- proc.time()
 cv.mod2 <- cv.hierbasis(x, y, nbasis = 10, nfolds = 10)
@@ -67,7 +65,7 @@ proc.time() - pt
 
 new.x <- rnorm(10)
 yhat1 <- predict(mod1, new.x = new.x)
-yhat2 <- predict(mod2, new.x = new.x, lam.idx = cv.mod2$lambda.1se.idx)
+yhat2 <- predict(mod2, new.x = new.x)
 yhat3 <- predict(cv.mod2, new.x = new.x)
 
 yhat1[,cv.mod2$lambda.1se.idx] - yhat2

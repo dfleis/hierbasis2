@@ -11,8 +11,8 @@ library(hierbasis2)
 #===== generate data =====#
 #=========================#
 set.seed(1)
-n <- 500
-p <- 6
+n <- 250
+p <- 3
 sigma <- 0
 
 X <- matrix(rnorm(n * p), nrow = n)
@@ -49,34 +49,45 @@ mod.ahb1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 20)
 proc.time() - pt
 
 pt <- proc.time()
-mod.ahb2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 20, basis.type = "trig")
+mod.ahb2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 20)
 proc.time() - pt
 
 pt <- proc.time()
 cv.mod2 <- hierbasis2::cv.additivehierbasis(X = X, y = y, nbasis = 20, nfolds = 10)
 proc.time() - pt
 
+new.X <- matrix(rnorm(9 * p), nrow = 9)
+yh1 <- predict(mod.ahb1, new.x = new.X)
+yh2.1 <- predict(cv.mod2, new.X = new.X, lam.idx = "lambda.1se")
+yh2.2 <- predict(cv.mod2, new.X = new.X, lam.idx = "lambda.min")
+
+plot(cv.mod2)
+plot(cv.mod2$test.err[1:20])
+points(cv.mod2$test.err.hi[1:20], col = 'red')
+
+yh2.1 - yh2.2
+
 print(mod.ahb2)
 plot(mod.ahb2,
      pred.idx    = 2,
      sign.lambda = -1,
-     plot.stat   = "coef",
+     plot.stat   = "active",
+     plot.type   = "image",
+     legend      = T)
+
+plot(mod.ahb2,
+     plot.stat   = "active",
      plot.type   = "image",
      legend      = T)
 
 
-plot.active.additivehierbasis(mod.ahb2, plot.type = "lines")
-plot.coef.additivehierbasis(mod.ahb2, pred.idx = 1)
+yhat <- predict(cv.mod2)
+str(yhat)
 
-new.X <- matrix(rnorm(10 * p), ncol = p)
-yhat1 <- predict(mod1, new.X)
-yhat2 <- predict(mod2, new.X = new.X, lam.idx = cv.mod2$lambda.1se.idx)
-yhat1[,cv.mod2$lambda.1se.idx] - yhat2
 
-yh2.0 <- predict(mod2, new.X = new.X, lam.idx = cv.mod2$lambda.1se.idx)
-yh2.1 <- predict(cv.mod2, new.X = new.X, lam.idx = cv.mod2$lambda.1se.idx)
-yh2.2 <- predict(cv.mod2, new.X = new.X)
-yh2.0 - yh2.2
+y
+yh
+
 
 #==================#
 #==== figures =====#
