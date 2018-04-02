@@ -2,10 +2,16 @@ useDynLib(hierbasis2)
 
 importFrom(Rcpp, evalCpp)
 import(Matrix)
+import(foreach)
+importFrom(fields, image.plot)
 
-export(hierbasis, print.hierbasis, predict.hierbasis, coef.hierbasis,
-       cv.hierbasis, predict.cv.hierbasis,
-       coef.cv.hierbasis, plot.cv.hierbasis,
-       additivehierbasis, predict.additivehierbasis, coef.additivehierbasis,
-       cv.additivehierbasis, predict.cv.additivehierbasis,
-       coef.cv.additivehierbasis, plot.cv.additivehierbasis)
+export(hierbasis,
+       print.hierbasis, predict.hierbasis, coef.hierbasis, plot.hierbasis,
+       cv.hierbasis,
+       predict.cv.hierbasis, coef.cv.hierbasis, plot.cv.hierbasis,
+       additivehierbasis,
+       print.additivehierbasis, predict.additivehierbasis, coef.additivehierbasis, plot.additivehierbasis,
+       cv.additivehierbasis,
+       predict.cv.additivehierbasis, coef.cv.additivehierbasis, plot.cv.additivehierbasis,
+       parula,
+       plot.active.additivehierbasis)

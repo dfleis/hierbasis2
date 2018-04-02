@@ -1,9 +1,11 @@
 library(devtools)
 #library(microbenchmark)
-library(HierBasis)
 
+library(glmnet)
+library(HierBasis)
 #install_github("dfleis/hierbasis2")
 library(hierbasis2)
+
 
 #=========================#
 #===== generate data =====#
@@ -39,17 +41,23 @@ plot(y ~ X[,3], pch = 19, cex = 0.75,
 #===== fit models =====#
 #======================#
 pt <- proc.time()
-mod1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 20)
+mod.glmnet <- glmnet(x = X, y = y, alpha = 1)
 proc.time() - pt
 
 pt <- proc.time()
-mod2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 20)
+mod.ahb1 <- HierBasis::AdditiveHierBasis(x = X, y = y, nbasis = 20)
+proc.time() - pt
+
+pt <- proc.time()
+mod.ahb2 <- hierbasis2::additivehierbasis(X = X, y = y, nbasis = 20)
 proc.time() - pt
 
 pt <- proc.time()
 cv.mod2 <- hierbasis2::cv.additivehierbasis(X = X, y = y, nbasis = 20, nfolds = 10)
 proc.time() - pt
 
+print(mod.ahb2)
+plot.active.additivehierbasis(mod.ahb2, sign.lambda = -1)
 
 new.X <- matrix(rnorm(10 * p), ncol = p)
 yhat1 <- predict(mod1, new.X)

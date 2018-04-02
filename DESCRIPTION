@@ -10,7 +10,8 @@ Depends:
   R (>= 3.4)
 Imports:
   Rcpp (>= 0.12.2), 
-  Matrix
+  Matrix,
+  foreach
 LinkingTo:
   Rcpp,
   RcppArmadillo
