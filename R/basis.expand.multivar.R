@@ -16,31 +16,28 @@ basis.expand.multivar <- function(X, nbasis,
   # so that we'll be able to center our data appropriately
   PSIbar <- matrix(NA, ncol = p, nrow = nbasis)
 
-  if (basis.type[1] == "poly") {
-    # POLYNOMIAL basis expansion
-    nbasis <- check.nbasis.poly(X, nbasis)
+  # generate and center basis exansion PSI over every predictor
+  # j = 1, ..., p of order 1 to nbasis
+  for (j in 1:p) {
+    if (basis.type[1] == "poly") {
+      # POLYNOMIAL basis expansion
+      PSI.array[,, j] <- expand.poly(X[,j], nbasis)
 
-    # think of a faster way to do this, particularly for large p
-    for (j in 1:p) {
-      # generate and center basis exansion PSI (of order nbasis)
-      PSI.array[,, j]    <- outer(X[, j], 1:nbasis, "^")
-      PSIj.c             <- scale(PSI.array[,, j], scale = F)
-      PSI.c.array[,, j]  <- PSIj.c
-      PSIbar[, j]        <- attributes(PSIj.c)[[2]]
+    } else if (basis.type[1] == "trig") {
+      # TRIGONOMETRIC basis expansion
+      PSI.array[,, j] <- expand.trig(X[,j], nbasis)
+
+    } else if (basis.type[1] == "wave") {
+      # WAVELET basis expansion
+      PSI.array[,, j] <- expand.wave(X[,j], nbasis)
+
+    } else {
+      stop("Parameter 'basis.type' only available for 'poly', 'trig', or 'wave' expansions.")
     }
-  } else if (basis.type[1] == "trig") {
-    # TRIGONOMETRIC basis expansion
-    stop("Error in hierbasis2::addhierbasis().
-          Parameter 'basis.type = \"trig\"' not yet implemented.")
 
-  } else if (basis.type[1] == "wave") {
-    # WAVELET basis expansion
-    stop("Error in hierbasis2::addhierbasis().
-          Parameter 'basis.type = \"wave\"' not yet implemented.")
-
-  } else {
-    stop("Error in hierbasis2::addhierbasis(). Parameter 'basis.type'
-         only available for 'poly', 'trig', or 'wave' expansions.")
+    PSIj.c            <- scale(PSI.array[,, j], scale = F)
+    PSI.c.array[,, j] <- PSIj.c
+    PSIbar[, j]       <- attributes(PSIj.c)[[2]]
   }
 
   out <- list()
