@@ -59,8 +59,6 @@ List FitAdditive(arma::vec y,
   arma::cube r_mats(J, J, p);
   arma::vec max_lam_values(p);
 
-
-
   // This loop does the QR decompositon and generates the Q, R matrices.
   // It also helps us find the maximum lambda value when it is not specified.
   for(int i = 0; i < p; ++i) {
@@ -69,7 +67,6 @@ List FitAdditive(arma::vec y,
     // Perform an 'economial' QR decomposition.
     arma::qr_econ(temp_x_mat, temp_r_mat, X.slice(i));
 
-
     // Generate the x_mat and the r_mat.
     temp_x_mat = temp_x_mat * sqrt(n);
     temp_r_mat = temp_r_mat / sqrt(n);
@@ -77,13 +74,11 @@ List FitAdditive(arma::vec y,
     x_mats.slice(i) = temp_x_mat;
     r_mats.slice(i) = temp_r_mat;
 
-
-
     // If max_lambda = NULL, then we select the maximum lambda value ourselves.
     if(R_IsNA(max_lambda)) {
       arma::vec v_temp = temp_x_mat.t() * (y/n);
       if(R_IsNA(alpha)) {
-        arma::vec temp_lam_max =  sqrt(abs(v_temp)/ ak);
+        arma::vec temp_lam_max = sqrt(abs(v_temp)/ ak);
 
         // This is obtained by solving the inequality
         // lambda^2 + lambda >= |v_1|.

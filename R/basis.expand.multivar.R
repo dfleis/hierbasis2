@@ -49,6 +49,6 @@ basis.expand.multivar <- function(X, nbasis,
   out$PSI.c.array <- PSI.c.array
   out$PSIbar      <- PSIbar
   out$nbasis      <- nbasis
-  out$basis.type  <- basis.type
+  out$basis.type  <- basis.type[1]
   out
 }

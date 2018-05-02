@@ -147,10 +147,11 @@ additivehierbasis <- function(X, y,
   # the centered matrix is used if "type = 'gaussian'"
   nbasis      <- basis.expand.out$nbasis
   PSI.array   <- basis.expand.out$PSI.array
-  PSI.c.array <- basis.expand.out$PSI.c
+  PSI.c.array <- basis.expand.out$PSI.c # centered basis expansion
   PSIbar      <- basis.expand.out$PSIbar
 
   ybar <- mean(y)
+  y.c <- y - ybar
 
   if (is.null(max.lambda)) max.lambda  <- NA
   if (is.null(alpha))      alpha       <- NA
@@ -158,9 +159,11 @@ additivehierbasis <- function(X, y,
   beta_is_zero <- all(beta.mat == 0)
 
   if (type[1] == "gaussian") {
-    mod <- FitAdditive(y - mean(y),
-                       w.mat, w,
-                       PSI.c.array, beta.mat,
+    mod <- FitAdditive(y             = y.c,
+                       weights       = w.mat,
+                       ak            = w,
+                       x             = PSI.c.array,
+                       beta          = beta.mat,
                        max_lambda    = max.lambda,
                        lam_min_ratio = lam.min.ratio,
                        alpha         = alpha,
