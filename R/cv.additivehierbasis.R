@@ -25,7 +25,7 @@
 #' by authors.
 #'
 cv.additivehierbasis <- function(X, y, lambdas = NULL, nfolds = 10, ...) {
-  # TO DO: Allow for other loss functions than rmse.
+  # TO DO: Allow for other loss functions than mse.
   # TO DO: Allow for parallel computing (foreach library?).
   # TO DO: Split some overhead off in its own function.
 
@@ -58,8 +58,8 @@ cv.additivehierbasis <- function(X, y, lambdas = NULL, nfolds = 10, ...) {
     if (mod.cv$type[1] == "binomial") {
       warning("Warning: 'type' not yet defined for 'binomial' models.")
     } else {
-      trn.err <- apply(yhat.trn, 2, function(yhat) rmse(y.trn, yhat))
-      tst.err <- apply(yhat.tst, 2, function(yhat) rmse(y.tst, yhat))
+      trn.err <- apply(yhat.trn, 2, function(yhat) mse(y.trn, yhat))
+      tst.err <- apply(yhat.tst, 2, function(yhat) mse(y.tst, yhat))
     }
 
     list("train" = trn.err, "test" = tst.err)
@@ -87,7 +87,7 @@ cv.additivehierbasis <- function(X, y, lambdas = NULL, nfolds = 10, ...) {
   out$test.err.hi <- test.err.hi
   out$test.err.lo <- test.err.lo
   out$lambdas     <- mod.init$lambdas
-  out$loss.func   <- "rmse" # to do... generalize...
+  out$loss.func   <- "mse" # to do... generalize...
   out <- c(out, best.lambdas)
 
   class(out) <- "cv.additivehierbasis"

@@ -2,6 +2,7 @@ library(devtools)
 #library(microbenchmark)
 
 library(glmnet)
+#install_github("asadharis/HierBasis")
 library(HierBasis)
 #install_github("dfleis/hierbasis2")
 library(hierbasis2)
@@ -88,6 +89,7 @@ str(yhat)
 y
 yh
 
+350/16
 
 #==================#
 #==== figures =====#
