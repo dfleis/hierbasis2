@@ -7,7 +7,6 @@ library(HierBasis)
 #install_github("dfleis/hierbasis2")
 library(hierbasis2)
 
-
 #=========================#
 #===== generate data =====#
 #=========================#
